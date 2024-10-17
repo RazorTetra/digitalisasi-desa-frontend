@@ -1,101 +1,126 @@
-import Image from "next/image";
+// src/app/page.tsx
+"use client"
+
+import { Suspense } from 'react'
+import Link from "next/link"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
+import { motion } from "framer-motion"
+
+const HomeContent = () => {
+  const services = [
+    { title: 'Informasi Desa', desc: 'Sejarah dan struktur perangkat desa', link: '/informasi-desa' },
+    { title: 'Tamu Wajib Lapor', desc: 'Lapor dalam 1x24 jam', link: '/tamu-wajib-lapor' },
+    { title: 'Surat Menyurat', desc: 'Layanan administrasi surat', link: '/surat-menyurat' },
+    { title: 'Transparansi', desc: 'Informasi keuangan desa', link: '/transparansi' },
+    { title: 'Pengumuman', desc: 'Informasi dan pengumuman resmi', link: '/pengumuman' },
+    { title: 'Pariwisata Desa', desc: 'Potensi wisata Desa Tandengan', link: '/pariwisata' },
+  ];
+
+  return (
+    <div className="container mx-auto px-4 py-12">
+      <section className="text-center mb-16">
+        <h1 className="text-4xl font-bold mb-4">Selamat Datang di Desa Tandengan Digital</h1>
+        <p className="text-xl text-muted-foreground mb-8">Pelayanan digital untuk kemajuan dan transparansi Desa Tandengan</p>
+      </section>
+
+      <section className="grid md:grid-cols-3 gap-8 mb-16">
+        {services.map((item, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+          >
+            <Card className="h-full flex flex-col">
+              <CardHeader>
+                <CardTitle>{item.title}</CardTitle>
+                <CardDescription>{item.desc}</CardDescription>
+              </CardHeader>
+              <CardContent className="flex-grow">
+                {/* Konten tambahan bisa ditambahkan di sini */}
+              </CardContent>
+              <CardFooter>
+                <Link href={item.link} className="text-primary hover:underline">
+                  Lihat Detail
+                </Link>
+              </CardFooter>
+            </Card>
+          </motion.div>
+        ))}
+      </section>
+
+      <section className="text-center mb-16">
+        <h2 className="text-3xl font-bold mb-4">Mengapa Desa Tandengan Digital?</h2>
+        <p className="text-lg text-muted-foreground mb-8">Kami berkomitmen untuk memberikan pelayanan terbaik dan memudahkan akses informasi bagi seluruh warga Desa Tandengan</p>
+        <div className="grid md:grid-cols-4 gap-6">
+          {[
+            { title: 'Efisien', desc: 'Pelayanan cepat dan tepat' },
+            { title: 'Transparan', desc: 'Informasi terbuka untuk publik' },
+            { title: 'Interaktif', desc: 'Kemudahan komunikasi warga dan perangkat desa' },
+            { title: 'Inovatif', desc: 'Pemanfaatan teknologi untuk kemajuan desa' },
+          ].map((item, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+            >
+              <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
+              <p className="text-muted-foreground">{item.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+    </div>
+  )
+}
+
+const LoadingSkeleton = () => (
+  <div className="container mx-auto px-4 py-12">
+    <section className="text-center mb-16">
+      <Skeleton className="h-12 w-3/4 mx-auto mb-4" />
+      <Skeleton className="h-6 w-1/2 mx-auto mb-8" />
+    </section>
+
+    <section className="grid md:grid-cols-3 gap-8 mb-16">
+      {[...Array(6)].map((_, i) => (
+        <Card key={i} className="h-full">
+          <CardHeader>
+            <Skeleton className="h-6 w-3/4 mb-2" />
+            <Skeleton className="h-4 w-full" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-20 w-full" />
+          </CardContent>
+          <CardFooter>
+            <Skeleton className="h-4 w-24" />
+          </CardFooter>
+        </Card>
+      ))}
+    </section>
+
+    <section className="text-center mb-16">
+      <Skeleton className="h-10 w-1/2 mx-auto mb-4" />
+      <Skeleton className="h-4 w-3/4 mx-auto mb-8" />
+      <div className="grid md:grid-cols-4 gap-6">
+        {[...Array(4)].map((_, i) => (
+          <div key={i}>
+            <Skeleton className="h-6 w-3/4 mb-2" />
+            <Skeleton className="h-4 w-full" />
+          </div>
+        ))}
+      </div>
+    </section>
+  </div>
+)
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+    <Suspense fallback={<LoadingSkeleton />}>
+      <HomeContent />
+    </Suspense>
+  )
 }
