@@ -42,6 +42,7 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: RegisterForm) => {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { konfirmasiPassword, ...registerData } = data;
       await registerUser(registerData as RegisterUserData);
       router.push("/login?registered=true");
