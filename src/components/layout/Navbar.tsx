@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ModeToggle } from '@/components/theme-toggle';
-import { Menu } from 'lucide-react';
+import { Menu, User } from 'lucide-react';
 import { logout } from '@/api/authApi';
 import { getCurrentUser, UserData } from '@/api/userApi';
 
@@ -64,6 +64,15 @@ const Navbar = () => {
               {user ? (
                 <>
                   <span className="text-sm font-medium mx-4">Halo, {user.namaDepan}</span>
+                  <Link href={`/${user.id}/profil`}>
+                    <Button 
+                      variant="ghost"
+                      className="mr-2 hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      Profil
+                    </Button>
+                  </Link>
                   <Button 
                     onClick={handleLogout} 
                     variant="outline"
@@ -116,6 +125,15 @@ const Navbar = () => {
             {user ? (
               <>
                 <span className="block px-3 py-2 text-sm font-medium">Halo, {user.namaDepan}</span>
+                <Link href={`/${user.id}/profil`} className="block w-full">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full text-left justify-start hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
+                  >
+                    <User className="mr-2 h-4 w-4" />
+                    Profil
+                  </Button>
+                </Link>
                 <Button 
                   onClick={handleLogout} 
                   variant="outline" 

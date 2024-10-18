@@ -2,6 +2,7 @@
 import { apiClient } from './apiClient';
 
 export interface UserData {
+  id: string;
   namaDepan: string;
   namaBelakang: string;
   nomorHp: string;
@@ -18,6 +19,9 @@ export const createUser = (userData: UserData) =>
 
 export const updateUser = (id: string, userData: Partial<UserData>) => 
   apiClient.put(`/users/${id}`, userData).then(response => response.data);
+
+export const getUserById = (id: string): Promise<UserData> => 
+  apiClient.get(`/users/${id}`).then(response => response.data);
 
 export const deleteUser = (id: string) => 
   apiClient.delete(`/users/${id}`).then(response => response.data);
