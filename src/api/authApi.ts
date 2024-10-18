@@ -19,3 +19,6 @@ export const registerUser = (userData: RegisterUserData) =>
 
 export const loginUser = (loginData: LoginData) => 
   authenticatedRequest(() => apiClient.post('/auth/login', loginData));
+
+export const logout = () => 
+  apiClient.post('/auth/logout').then(response => response.data);

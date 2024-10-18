@@ -1,4 +1,5 @@
 // src/app/(auth)/layout.tsx
+import Navbar from "@/components/layout/Navbar";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -12,8 +13,11 @@ export default function AuthLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-background">
-      {children}
-    </main>
+    <>
+      <Navbar />
+      <main className="min-h-screen flex items-center justify-center bg-background">
+        {children}
+      </main>
+    </>
   );
 }
