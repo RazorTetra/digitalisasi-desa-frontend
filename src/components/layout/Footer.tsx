@@ -15,9 +15,8 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Tautan Cepat</h3>
             <ul className="space-y-2">
-              <li><Link href="/layanan" className="text-sm hover:text-primary">Layanan</Link></li>
-              <li><Link href="/informasi" className="text-sm hover:text-primary">Informasi</Link></li>
-              <li><Link href="/tentang" className="text-sm hover:text-primary">Tentang Kami</Link></li>
+              <li><Link href="/pengumuman" className="text-sm hover:text-primary">Pengumuman</Link></li>
+              <li><Link href="/informasi-desa" className="text-sm hover:text-primary">Tentang Kami</Link></li>
             </ul>
           </div>
           <div>
@@ -28,7 +27,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Desa Tandengan Digital. Hak Cipta Dilindungi.
+          © {new Date().getFullYear()} Desa Tandengan Digital by Alisia Timunghide
         </div>
       </div>
     </footer>

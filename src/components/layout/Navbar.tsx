@@ -50,13 +50,10 @@ const Navbar = () => {
           </div>
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
-              <Link href="/layanan" className="text-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
-                Layanan
+              <Link href="/pengumuman" className="text-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
+                Pengumuman
               </Link>
-              <Link href="/informasi" className="text-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
-                Informasi
-              </Link>
-              <Link href="/tentang" className="text-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
+              <Link href="/informasi-desa" className="text-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
                 Tentang Kami
               </Link>
             </div>
@@ -110,13 +107,10 @@ const Navbar = () => {
       {isMenuOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link href="/layanan" className="text-foreground hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
-              Layanan
+            <Link href="/pengumuman" className="text-foreground hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
+              Pengumuman
             </Link>
-            <Link href="/informasi" className="text-foreground hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
-              Informasi
-            </Link>
-            <Link href="/tentang" className="text-foreground hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
+            <Link href="/informasi-desa" className="text-foreground hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
               Tentang Kami
             </Link>
             {user ? (

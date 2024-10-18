@@ -31,8 +31,8 @@ interface FeatureItem {
 const services: ServiceItem[] = [
   { title: 'Informasi Desa', desc: 'Sejarah dan struktur perangkat desa', link: '/informasi-desa', icon: Info },
   { title: 'Tamu Wajib Lapor', desc: 'Lapor dalam 1x24 jam', link: '/tamu-wajib-lapor', icon: UserCheck },
-  { title: 'Surat Menyurat', desc: 'Layanan administrasi surat', link: '/surat-menyurat', icon: FileText },
-  { title: 'Transparansi', desc: 'Informasi keuangan desa', link: '/transparansi', icon: TrendingUp },
+  { title: 'Surat Menyurat', desc: 'Layanan administrasi surat', link: '/surat', icon: FileText },
+  { title: 'Keuangan', desc: 'Informasi keuangan desa', link: '/keungan', icon: TrendingUp },
   { title: 'Pengumuman', desc: 'Informasi dan pengumuman resmi', link: '/pengumuman', icon: Bell },
   { title: 'Pariwisata Desa', desc: 'Potensi wisata Desa Tandengan', link: '/pariwisata', icon: Mountain },
 ];
@@ -45,7 +45,6 @@ const newsItems: NewsItem[] = [
 
 const featureItems: FeatureItem[] = [
   { title: "Administrasi Online", icon: "📄" },
-  { title: "Informasi Terintegrasi", icon: "🌐" },
   { title: "Pengaduan Masyarakat", icon: "🗣️" }
 ];
 
