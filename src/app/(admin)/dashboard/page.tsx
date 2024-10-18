@@ -1,8 +1,9 @@
-// src/app/(admin)/dashboard/page.tsx
+// src/app/admin/dashboard/page.tsx
 "use client"
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from '@/hooks/useAuth';
 
 interface DashboardStats {
   totalUsers: number;
@@ -11,6 +12,7 @@ interface DashboardStats {
 }
 
 export default function AdminDashboard() {
+  const { user, loading } = useAuth(true);
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
     activeRequests: 0,
@@ -18,14 +20,24 @@ export default function AdminDashboard() {
   });
 
   useEffect(() => {
-    // Fetch dashboard stats here
-    // For now, we'll use dummy data
-    setStats({
-      totalUsers: 1250,
-      activeRequests: 45,
-      completedRequests: 230,
-    });
-  }, []);
+    if (user && user.role === 'ADMIN') {
+      // Fetch dashboard stats here
+      // For now, we'll use dummy data
+      setStats({
+        totalUsers: 1250,
+        activeRequests: 45,
+        completedRequests: 230,
+      });
+    }
+  }, [user]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user || user.role !== 'ADMIN') {
+    return null; // This will be handled by the middleware, but we add this check for extra security
+  }
 
   return (
     <div>
