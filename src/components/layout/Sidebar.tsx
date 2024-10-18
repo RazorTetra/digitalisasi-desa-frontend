@@ -18,13 +18,24 @@ import {
   Settings,
   Menu,
   LogOut,
+  ChevronDown,
+  Info,
+  Building2,
+  Image,
+  Share2
 } from "lucide-react";
 import { logout } from "@/api/authApi";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface NavItem {
   title: string;
-  href: string;
+  href?: string;
   icon: React.ReactNode;
+  subItems?: NavItem[];
 }
 
 const navItems: NavItem[] = [
@@ -33,17 +44,20 @@ const navItems: NavItem[] = [
     href: "/dashboard",
     icon: <LayoutDashboard className="h-5 w-5" />,
   },
+  {
+    title: "Informasi Desa",
+    icon: <Info className="h-5 w-5" aria-hidden="true" />,
+    subItems: [
+      { title: "Sejarah Desa", href: "/village/village-info", icon: <FileText className="h-4 w-4" aria-hidden="true" /> },
+      { title: "Struktur Desa", href: "/village/village-structure", icon: <Building2 className="h-4 w-4" aria-hidden="true" /> },
+      // eslint-disable-next-line jsx-a11y/alt-text
+      { title: "Galeri Desa", href: "/village/village-gallery", icon: <Image className="h-4 w-4" aria-hidden="true" /> },
+      { title: "Media Sosial", href: "/village/village-social-media", icon: <Share2 className="h-4 w-4" aria-hidden="true" /> },
+    ]
+    
+  },
   { title: "Pengguna", href: "/users", icon: <Users className="h-5 w-5" /> },
-  {
-    title: "Dokumen",
-    href: "/documents",
-    icon: <FileText className="h-5 w-5" />,
-  },
-  {
-    title: "Pengaturan",
-    href: "/settings",
-    icon: <Settings className="h-5 w-5" />,
-  },
+  { title: "Pengaturan", href: "/settings", icon: <Settings className="h-5 w-5" /> },
 ];
 
 interface SidebarProps {
@@ -53,6 +67,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -117,6 +132,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
           toggleSidebar={toggleSidebar}
           pathname={pathname}
           handleLogout={handleLogout}
+          openDropdown={openDropdown}
+          setOpenDropdown={setOpenDropdown}
         />
       </motion.aside>
 
@@ -135,6 +152,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
               toggleSidebar={toggleMobileMenu}
               pathname={pathname}
               handleLogout={handleLogout}
+              openDropdown={openDropdown}
+              setOpenDropdown={setOpenDropdown}
             />
           </motion.aside>
         )}
@@ -148,6 +167,8 @@ interface SidebarContentProps {
   toggleSidebar: () => void;
   pathname: string;
   handleLogout: () => void;
+  openDropdown: string | null;
+  setOpenDropdown: (dropdown: string | null) => void;
 }
 
 const SidebarContent: React.FC<SidebarContentProps> = ({
@@ -155,6 +176,8 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
   toggleSidebar,
   pathname,
   handleLogout,
+  openDropdown,
+  setOpenDropdown,
 }) => (
   <>
     <div className="p-4 flex justify-between items-center">
@@ -175,19 +198,64 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
     <ScrollArea className="flex-1">
       <nav className="space-y-2 p-2">
         {navItems.map((item) => (
-          <Link key={item.href} href={item.href}>
-            <Button
-              variant="ghost"
-              className={cn(
-                "w-full justify-start",
-                pathname === item.href && "bg-muted",
-                isCollapsed && "justify-center"
-              )}
-            >
-              {item.icon}
-              {!isCollapsed && <span className="ml-2">{item.title}</span>}
-            </Button>
-          </Link>
+          <React.Fragment key={item.title}>
+            {item.subItems ? (
+              <Collapsible
+                open={openDropdown === item.title}
+                onOpenChange={() => setOpenDropdown(openDropdown === item.title ? null : item.title)}
+              >
+                <CollapsibleTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "w-full justify-start",
+                      openDropdown === item.title && "bg-muted",
+                      isCollapsed && "justify-center"
+                    )}
+                  >
+                    {item.icon}
+                    {!isCollapsed && (
+                      <>
+                        <span className="ml-2">{item.title}</span>
+                        <ChevronDown className="ml-auto h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pl-6 space-y-2">
+                  {item.subItems.map((subItem) => (
+                    <Link key={subItem.title} href={subItem.href || ''}>
+                      <Button
+                        variant="ghost"
+                        className={cn(
+                          "w-full justify-start",
+                          pathname === subItem.href && "bg-muted",
+                          isCollapsed && "justify-center"
+                        )}
+                      >
+                        {subItem.icon}
+                        {!isCollapsed && <span className="ml-2">{subItem.title}</span>}
+                      </Button>
+                    </Link>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+            ) : (
+              <Link href={item.href || ''}>
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start",
+                    pathname === item.href && "bg-muted",
+                    isCollapsed && "justify-center"
+                  )}
+                >
+                  {item.icon}
+                  {!isCollapsed && <span className="ml-2">{item.title}</span>}
+                </Button>
+              </Link>
+            )}
+          </React.Fragment>
         ))}
       </nav>
     </ScrollArea>
