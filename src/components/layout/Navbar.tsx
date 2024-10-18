@@ -1,14 +1,43 @@
 // src/components/layout/Navbar.tsx
 "use client"
 
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { ModeToggle } from "@/components/theme-toggle";
-import { Menu } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { ModeToggle } from '@/components/theme-toggle';
+import { Menu } from 'lucide-react';
+import { logout } from '@/api/authApi';
+import { getCurrentUser, UserData } from '@/api/userApi';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState<UserData | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userData = await getCurrentUser();
+        setUser(userData);
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+        setUser(null);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setUser(null);
+      router.push('/');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   return (
     <nav className="bg-background sticky top-0 z-50 w-full border-b">
@@ -35,6 +64,37 @@ const Navbar = () => {
           <div className="hidden md:block">
             <div className="ml-4 flex items-center md:ml-6">
               <ModeToggle />
+              {user ? (
+                <>
+                  <span className="text-sm font-medium mx-4">Halo, {user.namaDepan}</span>
+                  <Button 
+                    onClick={handleLogout} 
+                    variant="outline"
+                    className="hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
+                  >
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login">
+                    <Button 
+                      variant="ghost" 
+                      className="ml-2 hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
+                    >
+                      Login
+                    </Button>
+                  </Link>
+                  <Link href="/register">
+                    <Button 
+                      variant="outline" 
+                      className="ml-2 hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
+                    >
+                      Daftar
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
           <div className="md:hidden flex items-center">
@@ -59,6 +119,37 @@ const Navbar = () => {
             <Link href="/tentang" className="text-foreground hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
               Tentang Kami
             </Link>
+            {user ? (
+              <>
+                <span className="block px-3 py-2 text-sm font-medium">Halo, {user.namaDepan}</span>
+                <Button 
+                  onClick={handleLogout} 
+                  variant="outline" 
+                  className="w-full text-left justify-start hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
+                >
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link href="/login" className="block w-full">
+                  <Button 
+                    variant="ghost" 
+                    className="w-full text-left justify-start hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
+                  >
+                    Login
+                  </Button>
+                </Link>
+                <Link href="/register" className="block w-full">
+                  <Button 
+                    variant="outline" 
+                    className="w-full text-left justify-start hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
+                  >
+                    Daftar
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

@@ -21,3 +21,6 @@ export const updateUser = (id: string, userData: Partial<UserData>) =>
 
 export const deleteUser = (id: string) => 
   apiClient.delete(`/users/${id}`).then(response => response.data);
+
+export const getCurrentUser = (): Promise<UserData> => 
+  apiClient.get('/auth/me').then(response => response.data);
