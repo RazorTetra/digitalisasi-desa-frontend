@@ -1,4 +1,4 @@
-// src/app/(admin)/template.tsx
+// src/app/admin/template.tsx
 export default function AdminTemplate({
     children,
   }: {

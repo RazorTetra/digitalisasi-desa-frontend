@@ -1,4 +1,4 @@
-// src/app/(admin)/village/village-social-media/page.tsx
+// src/app/admin/village/village-social-media/page.tsx
 "use client"
 
 import React, { useState, useEffect } from 'react'

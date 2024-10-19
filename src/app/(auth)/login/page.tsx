@@ -50,7 +50,7 @@ export default function LoginPage() {
       const { user } = response;
       localStorage.setItem('userData', JSON.stringify(user));
       if (user.role === 'ADMIN') {
-        router.push('/dashboard');
+        router.push('/admin/dashboard');
       } else {
         router.push('/');
       }

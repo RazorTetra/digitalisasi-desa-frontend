@@ -63,7 +63,7 @@ const Navbar = () => {
                 Tentang Kami
               </Link>
               {user && user.role === 'ADMIN' && (
-                <Link href="/dashboard" className="text-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
+                <Link href="/admin/dashboard" className="text-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
                   <LayoutDashboard className="inline-block mr-2 h-4 w-4" />
                   Dashboard
                 </Link>
@@ -134,7 +134,7 @@ const Navbar = () => {
               Tentang Kami
             </Link>
             {user && user.role === 'ADMIN' && (
-              <Link href="/dashboard" className="text-foreground hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
+              <Link href="/admin/dashboard" className="text-foreground hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
                 <LayoutDashboard className="inline-block mr-2 h-4 w-4" />
                 Dashboard
               </Link>

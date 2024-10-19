@@ -59,31 +59,31 @@ const navItems: NavItem[] = [
   },
   {
     title: "Dashboard",
-    href: "/dashboard",
+    href: "/admin/dashboard",
     icon: <LayoutDashboard className="h-5 w-5" />,
   },
   {
     title: "Informasi Desa",
     icon: <Info className="h-5 w-5" aria-hidden="true" />,
     subItems: [
-      { title: "Sejarah Desa", href: "/village/village-info", icon: <FileText className="h-4 w-4" aria-hidden="true" /> },
-      { title: "Struktur Desa", href: "/village/village-structure", icon: <Building2 className="h-4 w-4" aria-hidden="true" /> },
+      { title: "Sejarah Desa", href: "/admin/village/village-info", icon: <FileText className="h-4 w-4" aria-hidden="true" /> },
+      { title: "Struktur Desa", href: "/admin/village/village-structure", icon: <Building2 className="h-4 w-4" aria-hidden="true" /> },
       // eslint-disable-next-line jsx-a11y/alt-text
-      { title: "Galeri Desa", href: "/village/village-gallery", icon: <Image className="h-4 w-4" aria-hidden="true" /> },
-      { title: "Media Sosial", href: "/village/village-social-media", icon: <Share2 className="h-4 w-4" aria-hidden="true" /> },
+      { title: "Galeri Desa", href: "/admin/village/village-gallery", icon: <Image className="h-4 w-4" aria-hidden="true" /> },
+      { title: "Media Sosial", href: "/admin/village/village-social-media", icon: <Share2 className="h-4 w-4" aria-hidden="true" /> },
     ]
   },
   {
     title: "Manajemen Konten",
     icon: <FileText className="h-5 w-5" aria-hidden="true" />,
     subItems: [
-      { title: "Pengumuman", href: "/announcement", icon: <Bell className="h-4 w-4" aria-hidden="true" /> },
-      { title: "Kategori Pengumuman", href: "/kategori", icon: <FileText className="h-4 w-4" aria-hidden="true" /> },
+      { title: "Pengumuman", href: "/admin/announcement", icon: <Bell className="h-4 w-4" aria-hidden="true" /> },
+      { title: "Kategori Pengumuman", href: "/admin/kategori", icon: <FileText className="h-4 w-4" aria-hidden="true" /> },
       // Add more content management subitems here if needed
     ]
   },
-  { title: "Pengguna", href: "/users", icon: <Users className="h-5 w-5" /> },
-  { title: "Pengaturan", href: "/settings", icon: <Settings className="h-5 w-5" /> },
+  { title: "Pengguna", href: "/admin/users", icon: <Users className="h-5 w-5" /> },
+  { title: "Pengaturan", href: "/admin/settings", icon: <Settings className="h-5 w-5" /> },
 ];
 
 interface SidebarProps {

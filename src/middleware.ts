@@ -6,9 +6,8 @@ import { User } from './api/authApi'
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
   const isAuthPath = path === '/login' || path === '/register'
-  const isAdminPath = path === '/dashboard' || path.startsWith('/village')|| path === '/users'
+  const isAdminPath = path.startsWith('/admin')
 
-  // Ganti ini dengan nama cookie yang benar
   const userDataString = request.cookies.get('userData')?.value
 
   if (userDataString) {
@@ -16,12 +15,8 @@ export async function middleware(request: NextRequest) {
       const userData: User = JSON.parse(userDataString)
       
       if (isAuthPath) {
-        // Jika user sudah login dan mencoba mengakses halaman auth, redirect ke halaman yang sesuai
-        if (userData.role === 'ADMIN') {
-          return NextResponse.redirect(new URL('/dashboard', request.url))
-        } else {
-          return NextResponse.redirect(new URL('/', request.url))
-        }
+        // Jika user sudah login dan mencoba mengakses halaman auth, redirect ke halaman utama
+        return NextResponse.redirect(new URL('/', request.url))
       }
 
       if (isAdminPath && userData.role !== 'ADMIN') {
@@ -35,9 +30,16 @@ export async function middleware(request: NextRequest) {
       response.cookies.delete('userData')
       return response
     }
-  } else if (!isAuthPath) {
-    // Jika tidak ada userData dan bukan di halaman auth, redirect ke login
-    return NextResponse.redirect(new URL('/login', request.url))
+  } else {
+    if (isAdminPath) {
+      // Jika tidak ada userData dan mencoba mengakses halaman admin, redirect ke login
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+    
+    if (isAuthPath) {
+      // Jika tidak ada userData dan mencoba mengakses halaman auth, izinkan
+      return NextResponse.next()
+    }
   }
 
   return NextResponse.next()
