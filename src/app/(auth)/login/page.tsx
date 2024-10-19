@@ -1,7 +1,7 @@
 // src/app/(auth)/login/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -20,7 +20,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
 import { loginUser, LoginData } from "@/api/authApi";
-import { useAuth } from '@/hooks/useAuth';
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Email tidak valid" }),
@@ -32,7 +31,6 @@ type LoginForm = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const { user, loading } = useAuth();
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -42,33 +40,20 @@ export default function LoginPage() {
     },
   });
 
-  useEffect(() => {
-    if (user) {
+  const onSubmit = async (data: LoginForm) => {
+    try {
+      const response = await loginUser(data as LoginData);
+      const { user } = response;
+      localStorage.setItem('userData', JSON.stringify(user));
       if (user.role === 'ADMIN') {
-        router.push('/admin/dashboard');
+        router.push('/dashboard');
       } else {
         router.push('/');
       }
-    }
-  }, [user, router]);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  const onSubmit = async (data: LoginForm) => {
-    try {
-      await loginUser(data as LoginData);
-      // Setelah login berhasil, kita perlu memuat ulang informasi pengguna
-      window.location.reload();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Terjadi kesalahan. Silakan coba lagi nanti.");
     }
   };
-
-  if (user) {
-    return null; // Pengguna sudah login, akan diarahkan oleh useEffect
-  }
 
   return (
     <Card className="w-full max-w-md">

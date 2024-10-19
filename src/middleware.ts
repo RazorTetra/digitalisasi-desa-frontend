@@ -1,58 +1,41 @@
 // src/middleware.ts
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { User } from './api/authApi'
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
   const isAuthPath = path === '/login' || path === '/register'
   const isAdminPath = path.startsWith('/admin')
 
-  const token = request.cookies.get('accessToken')?.value || ''
+  const userDataString = request.cookies.get('userData')?.value
 
-  if (isAuthPath && token) {
+  if (isAuthPath && userDataString) {
     // If user is already logged in, redirect them based on their role
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/me`, {
-        headers: {
-          Cookie: `accessToken=${token}`
-        }
-      })
-      
-      if (response.ok) {
-        const userData = await response.json()
-        if (userData.role === 'ADMIN') {
-          return NextResponse.redirect(new URL('/dashboard', request.url))
-        } else {
-          return NextResponse.redirect(new URL('/', request.url))
-        }
+      const userData: User = JSON.parse(userDataString)
+      if (userData.role === 'ADMIN') {
+        return NextResponse.redirect(new URL('/dashboard', request.url))
+      } else {
+        return NextResponse.redirect(new URL('/', request.url))
       }
     } catch (error) {
-      console.error('Error verifying user role:', error)
+      console.error('Error parsing user data:', error)
     }
   }
 
-  if (!token && !isAuthPath) {
+  if (!userDataString && !isAuthPath) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  if (token && isAdminPath) {
+  if (userDataString && isAdminPath) {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/me`, {
-        headers: {
-          Cookie: `accessToken=${token}`
-        }
-      })
-      
-      if (response.ok) {
-        const userData = await response.json()
-        if (userData.role !== 'ADMIN') {
-          return NextResponse.redirect(new URL('/unauthorized', request.url))
-        }
-      } else {
-        return NextResponse.redirect(new URL('/login', request.url))
+      const userData: User = JSON.parse(userDataString)
+      if (userData.role !== 'ADMIN') {
+        return NextResponse.redirect(new URL('/unauthorized', request.url))
       }
     } catch (error) {
-      console.error('Error verifying user role:', error)
+      console.error('Error parsing user data:', error)
       return NextResponse.redirect(new URL('/login', request.url))
     }
   }

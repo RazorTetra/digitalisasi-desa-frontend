@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from '@/hooks/useAuth';
+import { User } from '@/api/authApi';
 
 interface DashboardStats {
   totalUsers: number;
@@ -12,7 +12,8 @@ interface DashboardStats {
 }
 
 export default function AdminDashboard() {
-  const { user, loading } = useAuth(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
     activeRequests: 0,
@@ -20,16 +21,22 @@ export default function AdminDashboard() {
   });
 
   useEffect(() => {
-    if (user && user.role === 'ADMIN') {
-      // Fetch dashboard stats here
-      // For now, we'll use dummy data
-      setStats({
-        totalUsers: 1250,
-        activeRequests: 45,
-        completedRequests: 230,
-      });
+    const userDataString = localStorage.getItem('userData');
+    if (userDataString) {
+      const userData: User = JSON.parse(userDataString);
+      setUser(userData);
+      if (userData.role === 'ADMIN') {
+        // Fetch dashboard stats here
+        // For now, we'll use dummy data
+        setStats({
+          totalUsers: 1250,
+          activeRequests: 45,
+          completedRequests: 230,
+        });
+      }
     }
-  }, [user]);
+    setLoading(false);
+  }, []);
 
   if (loading) {
     return <div>Loading...</div>;

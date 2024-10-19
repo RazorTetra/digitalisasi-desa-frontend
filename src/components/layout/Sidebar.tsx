@@ -30,6 +30,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { User } from "@/api/authApi";
 
 interface NavItem {
   title: string;
@@ -68,8 +69,16 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [, setUser] = useState<User | null>(null);
   const pathname = usePathname();
   const router = useRouter();
+
+  useEffect(() => {
+    const userDataString = localStorage.getItem('userData');
+    if (userDataString) {
+      setUser(JSON.parse(userDataString));
+    }
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -93,6 +102,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
   const handleLogout = async () => {
     try {
       await logout();
+      localStorage.removeItem('userData');
       router.push("/login");
     } catch (error) {
       console.error("Logout failed:", error);

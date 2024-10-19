@@ -6,32 +6,27 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ModeToggle } from '@/components/theme-toggle';
-import { Menu, User } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { logout } from '@/api/authApi';
-import { getCurrentUser, UserData } from '@/api/userApi';
+import { User } from '@/api/authApi';
+import { PersonIcon } from '@radix-ui/react-icons';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [user, setUser] = useState<UserData | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const userData = await getCurrentUser();
-        setUser(userData);
-      } catch (error) {
-        console.error('Failed to fetch user data:', error);
-        setUser(null);
-      }
-    };
-
-    fetchUser();
+    const userDataString = localStorage.getItem('userData');
+    if (userDataString) {
+      setUser(JSON.parse(userDataString));
+    }
   }, []);
 
   const handleLogout = async () => {
     try {
       await logout();
+      localStorage.removeItem('userData');
       setUser(null);
       router.push('/');
     } catch (error) {
@@ -69,7 +64,7 @@ const Navbar = () => {
                       variant="ghost"
                       className="mr-2 hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
                     >
-                      <User className="mr-2 h-4 w-4" />
+                      <PersonIcon className="mr-2 h-4 w-4" />
                       Profil
                     </Button>
                   </Link>
@@ -130,7 +125,7 @@ const Navbar = () => {
                     variant="ghost" 
                     className="w-full text-left justify-start hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
                   >
-                    <User className="mr-2 h-4 w-4" />
+                    <PersonIcon className="mr-2 h-4 w-4" />
                     Profil
                   </Button>
                 </Link>

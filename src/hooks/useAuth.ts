@@ -1,32 +1,25 @@
 // src/hooks/useAuth.ts
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { getCurrentUser, UserData } from '@/api/userApi'
+import { User } from '@/api/authApi'
 
 export function useAuth(requireAdmin: boolean = false) {
-  const [user, setUser] = useState<UserData | null>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
-    async function loadUser() {
-      try {
-        const userData = await getCurrentUser()
-        setUser(userData)
-        if (requireAdmin && userData.role !== 'ADMIN') {
-          router.push('/unauthorized')
-        }
-      } catch (error) {
-        console.error('Failed to load user:', error)
-        if (requireAdmin) {
-          router.push('/login')
-        }
-      } finally {
-        setLoading(false)
+    const userDataString = localStorage.getItem('userData')
+    if (userDataString) {
+      const userData: User = JSON.parse(userDataString)
+      setUser(userData)
+      if (requireAdmin && userData.role !== 'ADMIN') {
+        router.push('/unauthorized')
       }
+    } else if (requireAdmin) {
+      router.push('/login')
     }
-
-    loadUser()
+    setLoading(false)
   }, [router, requireAdmin])
 
   return { user, loading }

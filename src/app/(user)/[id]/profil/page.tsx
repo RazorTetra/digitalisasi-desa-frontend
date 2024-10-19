@@ -6,7 +6,6 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { motion } from 'framer-motion'
-import { useAuth } from '@/hooks/useAuth'
 import { getUserById, updateUser, UserData } from '@/api/userApi'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
@@ -16,6 +15,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { UserCircle } from 'lucide-react'
+import { User } from '@/api/authApi'
 
 const profileSchema = z.object({
   namaDepan: z.string().min(2, "Nama depan minimal 2 karakter"),
@@ -29,8 +29,8 @@ type ProfileFormValues = z.infer<typeof profileSchema>
 
 const ProfilePage: React.FC = () => {
   const { id } = useParams()
-  const { user: currentUser, loading: authLoading } = useAuth()
-  const [user, setUser] = useState<UserData | null>(null)
+  const [user, setUser] = useState<User | null>(null)
+  const [currentUser, setCurrentUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
   const [updateSuccess, setUpdateSuccess] = useState(false)
@@ -67,6 +67,11 @@ const ProfilePage: React.FC = () => {
       }
     }
 
+    const userDataString = localStorage.getItem('userData')
+    if (userDataString) {
+      setCurrentUser(JSON.parse(userDataString))
+    }
+
     fetchUser()
   }, [id, form])
 
@@ -97,7 +102,7 @@ const ProfilePage: React.FC = () => {
     }
   }
 
-  if (loading || authLoading) {
+  if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <Card>
