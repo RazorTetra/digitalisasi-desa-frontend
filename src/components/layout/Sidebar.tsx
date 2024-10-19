@@ -31,6 +31,16 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { User } from "@/api/authApi";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface NavItem {
   title: string;
@@ -55,7 +65,6 @@ const navItems: NavItem[] = [
       { title: "Galeri Desa", href: "/village/village-gallery", icon: <Image className="h-4 w-4" aria-hidden="true" /> },
       { title: "Media Sosial", href: "/village/village-social-media", icon: <Share2 className="h-4 w-4" aria-hidden="true" /> },
     ]
-    
   },
   { title: "Pengguna", href: "/users", icon: <Users className="h-5 w-5" /> },
   { title: "Pengaturan", href: "/settings", icon: <Settings className="h-5 w-5" /> },
@@ -70,6 +79,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [, setUser] = useState<User | null>(null);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -141,9 +151,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
           isCollapsed={isCollapsed}
           toggleSidebar={toggleSidebar}
           pathname={pathname}
-          handleLogout={handleLogout}
           openDropdown={openDropdown}
           setOpenDropdown={setOpenDropdown}
+          setShowLogoutDialog={setShowLogoutDialog}
         />
       </motion.aside>
 
@@ -161,13 +171,28 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
               isCollapsed={false}
               toggleSidebar={toggleMobileMenu}
               pathname={pathname}
-              handleLogout={handleLogout}
               openDropdown={openDropdown}
               setOpenDropdown={setOpenDropdown}
+              setShowLogoutDialog={setShowLogoutDialog}
             />
           </motion.aside>
         )}
       </AnimatePresence>
+
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apakah Anda yakin ingin keluar?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Anda akan keluar dari akun Anda. Untuk mengakses kembali, Anda perlu login ulang.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout}>Keluar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
@@ -176,18 +201,18 @@ interface SidebarContentProps {
   isCollapsed: boolean;
   toggleSidebar: () => void;
   pathname: string;
-  handleLogout: () => void;
   openDropdown: string | null;
   setOpenDropdown: (dropdown: string | null) => void;
+  setShowLogoutDialog: (show: boolean) => void;
 }
 
 const SidebarContent: React.FC<SidebarContentProps> = ({
   isCollapsed,
   toggleSidebar,
   pathname,
-  handleLogout,
   openDropdown,
   setOpenDropdown,
+  setShowLogoutDialog,
 }) => (
   <>
     <div className="p-4 flex justify-between items-center">
@@ -280,7 +305,7 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
         <Button
           variant="ghost"
           size="icon"
-          onClick={handleLogout}
+          onClick={() => setShowLogoutDialog(true)}
           aria-label="Logout"
         >
           <LogOut className="h-5 w-5" />

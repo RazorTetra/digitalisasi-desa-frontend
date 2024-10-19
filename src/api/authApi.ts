@@ -1,5 +1,4 @@
-// src/api/authApi.ts
-import { apiClient, authenticatedRequest } from './apiClient';
+import { apiClient } from "./apiClient";
 
 export interface RegisterUserData {
   namaDepan: string;
@@ -19,7 +18,7 @@ export interface User {
   namaDepan: string;
   namaBelakang: string;
   email: string;
-  role: 'ADMIN' | 'USER';
+  role: "ADMIN" | "USER";
 }
 
 export interface LoginResponse {
@@ -27,11 +26,26 @@ export interface LoginResponse {
   user: User;
 }
 
-export const registerUser = (userData: RegisterUserData) => 
-  authenticatedRequest(() => apiClient.post('/auth/register', userData));
+export const registerUser = (userData: RegisterUserData) =>
+  apiClient.post("/auth/register", userData);
 
-export const loginUser = (loginData: LoginData): Promise<LoginResponse> => 
-  apiClient.post('/auth/login', loginData).then(response => response.data);
+export const loginUser = async (
+  loginData: LoginData
+): Promise<LoginResponse> => {
+  const response = await apiClient.post<LoginResponse>(
+    "/auth/login",
+    loginData
+  );
+  // Simpan data user ke localStorage
+  localStorage.setItem("userData", JSON.stringify(response.data.user));
+  return response.data;
+};
 
-export const logout = () => 
-  apiClient.post('/auth/logout').then(response => response.data);
+export const logout = async () => {
+  const response = await apiClient.post("/auth/logout");
+  localStorage.removeItem("userData");
+  return response.data;
+};
+
+export const getCurrentUser = (): Promise<User> =>
+  apiClient.get<User>("/auth/me").then((response) => response.data);

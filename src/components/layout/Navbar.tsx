@@ -10,10 +10,21 @@ import { Menu } from 'lucide-react';
 import { logout } from '@/api/authApi';
 import { User } from '@/api/authApi';
 import { PersonIcon } from '@radix-ui/react-icons';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -69,7 +80,7 @@ const Navbar = () => {
                     </Button>
                   </Link>
                   <Button 
-                    onClick={handleLogout} 
+                    onClick={() => setShowLogoutDialog(true)} 
                     variant="outline"
                     className="hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
                   >
@@ -90,8 +101,7 @@ const Navbar = () => {
                     <Button 
                       variant="outline" 
                       className="ml-2 hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
-                    >
-                      Daftar
+                    >Daftar
                     </Button>
                   </Link>
                 </>
@@ -130,7 +140,7 @@ const Navbar = () => {
                   </Button>
                 </Link>
                 <Button 
-                  onClick={handleLogout} 
+                  onClick={() => setShowLogoutDialog(true)} 
                   variant="outline" 
                   className="w-full text-left justify-start hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
                 >
@@ -160,6 +170,21 @@ const Navbar = () => {
           </div>
         </div>
       )}
+
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apakah Anda yakin ingin keluar?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Anda akan keluar dari akun Anda. Untuk mengakses kembali, Anda perlu login ulang.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout}>Keluar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </nav>
   );
 };

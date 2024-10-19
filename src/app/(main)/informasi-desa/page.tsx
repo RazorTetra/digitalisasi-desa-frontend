@@ -1,106 +1,176 @@
-// src/app/informasi-desa/page.tsx
 "use client"
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
+import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Facebook, Instagram, Twitter, Mail } from 'lucide-react'
-
-// Data dummy untuk struktur desa
-const strukturDesa = [
-  { jabatan: "Kepala Desa", nama: "Bpk. John Doe" },
-  { jabatan: "Sekretaris Desa", nama: "Ibu Jane Smith" },
-  { jabatan: "Bendahara Desa", nama: "Bpk. Michael Johnson" },
-  { jabatan: "Kepala Urusan Pemerintahan", nama: "Ibu Emily Brown" },
-  { jabatan: "Kepala Urusan Pembangunan", nama: "Bpk. David Wilson" },
-]
+import { getVillageInfo, getVillageStructure, getGallery, getSocialMedia } from '@/api/villageApi'
+import { VillageInfo, VillageStructure, GalleryImage, SocialMedia } from '@/api/villageApi'
 
 const InformasiDesaPage: React.FC = () => {
+  const [villageInfo, setVillageInfo] = useState<VillageInfo | null>(null)
+  const [structures, setStructures] = useState<VillageStructure[]>([])
+  const [gallery, setGallery] = useState<GalleryImage[]>([])
+  const [socialMedia, setSocialMedia] = useState<SocialMedia[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [infoData, structureData, galleryData, socialMediaData] = await Promise.all([
+          getVillageInfo(),
+          getVillageStructure(),
+          getGallery(),
+          getSocialMedia()
+        ])
+        setVillageInfo(infoData)
+        setStructures(structureData)
+        setGallery(galleryData)
+        setSocialMedia(socialMediaData)
+      } catch (err) {
+        setError("Terjadi kesalahan saat memuat data. Silakan coba lagi nanti.")
+        console.error("Error fetching data:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  if (loading) {
+    return <LoadingSkeleton />
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive" className="m-4">
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    )
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">Informasi Desa Tandengan</h1>
+      <motion.h1
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="text-4xl font-bold mb-12 text-center text-primary"
+      >
+        Informasi Desa Tandengan
+      </motion.h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-        <Card>
-          <CardHeader>
-            <CardTitle>Struktur Desa</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Accordion type="single" collapsible className="w-full">
-              {strukturDesa.map((item, index) => (
-                <AccordionItem key={index} value={`item-${index}`}>
-                  <AccordionTrigger>{item.jabatan}</AccordionTrigger>
-                  <AccordionContent>{item.nama}</AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Sejarah Desa</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              Dibentuknya sebuah wanua (atau wilayah pemukiman) di lokasi Desa Tandengan saat ini bermula dari kedatangan tiga orang bernama Oroh, Tumonggor, dan Lumempow dari daerah Minawanua (sekarang daerah Kelurahan Toulour di Kecamatan Tondano Timur). Setelah beberapa lama menjadi tempat hilir mudik perahu dari Minawanua maupun Remboken, pada tahun 1809 dibentuk menjadi sebuah wanua dengan nama Timadeng (yang berarti semenanjung). Nama wanua ini kemudian berubah menjadi Tandengan.
-            </p>
-            <p className="text-sm text-gray-600 leading-relaxed mt-4">
-              Saat ini Desa Tandengan terbagi menjadi lima jaga dan memiliki luas desa kurang lebih 128 Ha (1.280.000 m²) dengan jumlah penduduk 1.267 jiwa. Sampai saat ini penduduk dan Pemerintah Desa mengupayakan supaya Desa menjadi salah satu Desa Wisata di Kabupaten Minahasa dan di Sulawesi Utara. Beberapa &apos;potensi&apos; Objek Wisata bisa kita temui di Desa ini yakni Wisata Teluk Sumalangka, Teluk Sinawu, Air terjun Tuunan, Tanjung Watu dan Pulau likri.
-            </p>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <VillageHistoryCard history={villageInfo?.history} />
+        <VillageStructureCard structures={structures} />
       </div>
       
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Galeri Desa</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((item) => (
-              <div key={item} className="relative h-48">
-                <Image
-                  src={`/images/desa${item}.jpg`}
-                  alt={`Gambar Desa ${item}`}
-                  layout="fill"
-                  objectFit="cover"
-                  className="rounded-lg"
-                />
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Hubungi Kami</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Button variant="outline" size="icon">
-              <Facebook className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="icon">
-              <Instagram className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="icon">
-              <Twitter className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="icon">
-              <Mail className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <VillageGalleryCard gallery={gallery} />
+      <VillageSocialMediaCard socialMedia={socialMedia} />
     </div>
   )
 }
 
-export default InformasiDesaPage
+const VillageStructureCard: React.FC<{ structures: VillageStructure[] }> = ({ structures }) => (
+  <Card className="bg-card">
+    <CardHeader>
+      <CardTitle className="text-2xl text-primary">Struktur Desa</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <Accordion type="single" collapsible className="w-full">
+        {structures.map((item, index) => (
+          <AccordionItem key={item.id} value={`item-${index}`}>
+            <AccordionTrigger className="text-primary hover:text-primary/80">{item.position}</AccordionTrigger>
+            <AccordionContent className="text-foreground/80">{item.name}</AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+    </CardContent>
+  </Card>
+)
 
-// TODO: Implementasi fitur untuk admin agar dapat mengelola informasi desa, struktur desa, dan tautan media sosial secara dinamis
-// Ini dapat dilakukan dengan menambahkan halaman admin dan API endpoints untuk CRUD operasi pada informasi desa
+const VillageHistoryCard: React.FC<{ history: string | undefined }> = ({ history }) => (
+  <Card className="bg-card">
+    <CardHeader>
+      <CardTitle className="text-2xl text-primary">Sejarah Desa</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <p className="text-foreground leading-relaxed">
+        {history || "Belum ada informasi sejarah desa."}
+      </p>
+    </CardContent>
+  </Card>
+)
+
+const VillageGalleryCard: React.FC<{ gallery: GalleryImage[] }> = ({ gallery }) => (
+  <div className="mb-12">
+    <h2 className="text-2xl font-semibold mb-6 text-primary">Galeri Desa</h2>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {gallery.map((image) => (
+        <div key={image.id} className="relative aspect-square rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <Image
+            src={image.imageUrl}
+            alt={image.description || "Gambar Desa"}
+            layout="fill"
+            objectFit="cover"
+            className="rounded-lg transition-transform duration-300 hover:scale-110"
+          />
+          {image.description && (
+            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white p-2 text-sm">
+              {image.description}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+)
+
+const VillageSocialMediaCard: React.FC<{ socialMedia: SocialMedia[] }> = ({ socialMedia }) => (
+  <div className="bg-card rounded-lg p-8 text-center">
+    <h2 className="text-2xl font-semibold mb-6 text-primary">Ikuti Kami</h2>
+    <div className="flex justify-center space-x-4">
+      {socialMedia.map((item) => (
+        <Button key={item.id} variant="outline" size="icon" className="rounded-full hover:bg-primary hover:text-primary-foreground" asChild>
+          <a href={item.url} target="_blank" rel="noopener noreferrer" aria-label={`Follow us on ${item.platform}`}>
+            {getSocialMediaIcon(item.platform)}
+          </a>
+        </Button>
+      ))}
+    </div>
+  </div>
+)
+
+const getSocialMediaIcon = (platform: string) => {
+  switch (platform.toLowerCase()) {
+    case 'facebook':
+      return <Facebook className="h-5 w-5" />
+    case 'instagram':
+      return <Instagram className="h-5 w-5" />
+    case 'twitter':
+      return <Twitter className="h-5 w-5" />
+    default:
+      return <Mail className="h-5 w-5" />
+  }
+}
+
+const LoadingSkeleton: React.FC = () => (
+  <div className="container mx-auto px-4 py-8">
+    <Skeleton className="h-12 w-3/4 mx-auto mb-12" />
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+      <Skeleton className="h-64" />
+      <Skeleton className="h-64" />
+    </div>
+    <Skeleton className="h-96 mb-12" />
+    <Skeleton className="h-24" />
+  </div>
+)
+
+export default InformasiDesaPage
