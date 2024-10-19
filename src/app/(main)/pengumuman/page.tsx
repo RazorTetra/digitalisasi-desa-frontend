@@ -9,38 +9,79 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { AlertCircle, Calendar, Search } from 'lucide-react'
+import { AlertCircle, Calendar, Search, ChevronLeft, ChevronRight } from 'lucide-react'
+import Link from 'next/link'
+import { useToast } from "@/hooks/use-toast"
+import { Pengumuman, Kategori, getAllPengumuman, getAllKategori } from '@/api/announcementApi'
 
-// TODO: Ganti dengan data aktual dari backend
-const dummyPengumuman = [
-  { id: 1, judul: "Jadwal Vaksinasi COVID-19", isi: "Vaksinasi COVID-19 tahap kedua akan dilaksanakan pada tanggal 15 Juli 2024...", tanggal: "2024-07-01", kategori: "Kesehatan" },
-  { id: 2, judul: "Pembukaan Pendaftaran UMKM", isi: "Pendaftaran UMKM untuk program bantuan modal usaha dibuka mulai 1 Agustus 2024...", tanggal: "2024-07-15", kategori: "Ekonomi" },
-  { id: 3, judul: "Perayaan HUT Desa", isi: "Dalam rangka HUT Desa ke-50, akan diadakan berbagai lomba dan kegiatan mulai tanggal 10 Agustus 2024...", tanggal: "2024-07-20", kategori: "Acara" },
-  { id: 4, judul: "Pembangunan Jembatan", isi: "Proyek pembangunan jembatan penghubung antar dusun akan dimulai pada 1 September 2024...", tanggal: "2024-08-01", kategori: "Infrastruktur" },
-  { id: 5, judul: "Pelatihan Keterampilan Digital", isi: "Pelatihan keterampilan digital untuk pemuda desa akan diadakan pada 5-7 September 2024...", tanggal: "2024-08-15", kategori: "Pendidikan" },
-]
+const ITEMS_PER_PAGE = 5
 
 const PengumumanPage: React.FC = () => {
-  const [pengumuman] = useState(dummyPengumuman)
-  const [filteredPengumuman, setFilteredPengumuman] = useState(dummyPengumuman)
+  const [pengumuman, setPengumuman] = useState<Pengumuman[]>([])
+  const [kategori, setKategori] = useState<Kategori[]>([])
+  const [filteredPengumuman, setFilteredPengumuman] = useState<Pengumuman[]>([])
   const [searchTerm, setSearchTerm] = useState('')
-  const [activeTab, setActiveTab] = useState('Semua')
+  const [activeTab, setActiveTab] = useState('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [isLoading, setIsLoading] = useState(true)
+  const { toast } = useToast()
 
-  // TODO: Ganti dengan data aktual dari backend
-  const categories = ['Semua', 'Kesehatan', 'Ekonomi', 'Acara', 'Infrastruktur', 'Pendidikan']
+  useEffect(() => {
+    fetchPengumuman()
+    fetchKategori()
+  }, [])
+
+  const fetchPengumuman = async () => {
+    setIsLoading(true)
+    try {
+      const data = await getAllPengumuman()
+      setPengumuman(data)
+      setFilteredPengumuman(data)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Gagal memuat pengumuman. Silakan coba lagi nanti.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const fetchKategori = async () => {
+    try {
+      const data = await getAllKategori()
+      setKategori(data)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Gagal memuat kategori. Silakan coba lagi nanti.",
+        variant: "destructive",
+      })
+    }
+  }
 
   useEffect(() => {
     const filtered = pengumuman.filter(item =>
-      item.judul.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.isi.toLowerCase().includes(searchTerm.toLowerCase())
+      (item.judul.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.isi.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      (activeTab === 'all' || item.kategoriId === activeTab)
     )
-    setFilteredPengumuman(activeTab === 'Semua' ? filtered : filtered.filter(item => item.kategori === activeTab))
+    setFilteredPengumuman(filtered)
+    setCurrentPage(1)
   }, [searchTerm, activeTab, pengumuman])
 
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' }
     return new Date(dateString).toLocaleDateString('id-ID', options)
   }
+
+  const paginatedPengumuman = filteredPengumuman.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  )
+
+  const totalPages = Math.ceil(filteredPengumuman.length / ITEMS_PER_PAGE)
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -57,16 +98,18 @@ const PengumumanPage: React.FC = () => {
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
       </div>
 
-      <Tabs defaultValue="Semua" className="mb-8">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
         <TabsList className="flex flex-wrap justify-center">
-          {categories.map((category) => (
+          <TabsTrigger value="all" className="m-1">
+            Semua
+          </TabsTrigger>
+          {kategori.map((category) => (
             <TabsTrigger
-              key={category}
-              value={category}
-              onClick={() => setActiveTab(category)}
+              key={category.id}
+              value={category.id}
               className="m-1"
             >
-              {category}
+              {category.nama}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -74,8 +117,12 @@ const PengumumanPage: React.FC = () => {
 
       <ScrollArea className="h-[600px] rounded-md border p-4">
         <AnimatePresence>
-          {filteredPengumuman.length > 0 ? (
-            filteredPengumuman.map((item) => (
+          {isLoading ? (
+            <div className="flex justify-center items-center h-full">
+              <AlertCircle className="h-16 w-16 text-gray-400 animate-spin" />
+            </div>
+          ) : paginatedPengumuman.length > 0 ? (
+            paginatedPengumuman.map((item) => (
               <motion.div
                 key={item.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -88,7 +135,9 @@ const PengumumanPage: React.FC = () => {
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <CardTitle className="text-xl font-bold">{item.judul}</CardTitle>
-                      <Badge variant="secondary">{item.kategori}</Badge>
+                      <Badge variant="secondary">
+                        {kategori.find(k => k.id === item.kategoriId)?.nama || 'Tidak ada kategori'}
+                      </Badge>
                     </div>
                     <div className="flex items-center text-sm text-gray-500">
                       <Calendar className="mr-2 h-4 w-4" />
@@ -96,8 +145,10 @@ const PengumumanPage: React.FC = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-600">{item.isi}</p>
-                    <Button variant="link" className="mt-4 p-0">Baca selengkapnya</Button>
+                    <p className="text-gray-600">{item.isi.substring(0, 150)}...</p>
+                    <Link href={`/pengumuman/${item.id}`}>
+                      <Button variant="link" className="mt-4 p-0">Baca selengkapnya</Button>
+                    </Link>
                   </CardContent>
                 </Card>
               </motion.div>
@@ -114,11 +165,30 @@ const PengumumanPage: React.FC = () => {
           )}
         </AnimatePresence>
       </ScrollArea>
+
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center mt-6 space-x-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span>{currentPage} dari {totalPages}</span>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
 
 export default PengumumanPage
-
-// TODO: Implementasi fitur untuk admin agar dapat mengelola pengumuman secara dinamis
-// Ini dapat dilakukan dengan menambahkan halaman admin dan API endpoints untuk CRUD operasi pada pengumuman

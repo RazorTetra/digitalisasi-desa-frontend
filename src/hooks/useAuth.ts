@@ -11,10 +11,16 @@ export function useAuth(requireAdmin: boolean = false) {
   useEffect(() => {
     const userDataString = localStorage.getItem('userData')
     if (userDataString) {
-      const userData: User = JSON.parse(userDataString)
-      setUser(userData)
-      if (requireAdmin && userData.role !== 'ADMIN') {
-        router.push('/unauthorized')
+      try {
+        const userData: User = JSON.parse(userDataString)
+        setUser(userData)
+        if (requireAdmin && userData.role !== 'ADMIN') {
+          router.push('/unauthorized')
+        }
+      } catch (error) {
+        console.error('Error parsing user data:', error)
+        localStorage.removeItem('userData')
+        router.push('/login')
       }
     } else if (requireAdmin) {
       router.push('/login')

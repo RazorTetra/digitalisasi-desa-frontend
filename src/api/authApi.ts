@@ -38,12 +38,16 @@ export const loginUser = async (
   );
   // Simpan data user ke localStorage
   localStorage.setItem("userData", JSON.stringify(response.data.user));
+  document.cookie = `userData=${JSON.stringify(response.data.user)}; path=/; max-age=86400; secure; samesite=strict`;
+  
   return response.data;
 };
 
 export const logout = async () => {
   const response = await apiClient.post("/auth/logout");
   localStorage.removeItem("userData");
+  document.cookie = `userData=${JSON.stringify(response.data.user)}; path=/; max-age=86400; secure; samesite=strict`;
+  
   return response.data;
 };
 

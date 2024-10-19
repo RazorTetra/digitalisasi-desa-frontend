@@ -22,7 +22,8 @@ import {
   Info,
   Building2,
   Image,
-  Share2
+  Share2,
+  Bell
 } from "lucide-react";
 import { logout } from "@/api/authApi";
 import {
@@ -64,6 +65,14 @@ const navItems: NavItem[] = [
       // eslint-disable-next-line jsx-a11y/alt-text
       { title: "Galeri Desa", href: "/village/village-gallery", icon: <Image className="h-4 w-4" aria-hidden="true" /> },
       { title: "Media Sosial", href: "/village/village-social-media", icon: <Share2 className="h-4 w-4" aria-hidden="true" /> },
+    ]
+  },
+  {
+    title: "Manajemen Konten",
+    icon: <FileText className="h-5 w-5" aria-hidden="true" />,
+    subItems: [
+      { title: "Pengumuman", href: "/announcement", icon: <Bell className="h-4 w-4" aria-hidden="true" /> },
+      // Add more content management subitems here if needed
     ]
   },
   { title: "Pengguna", href: "/users", icon: <Users className="h-5 w-5" /> },
