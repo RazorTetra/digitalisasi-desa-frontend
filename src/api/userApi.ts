@@ -18,13 +18,17 @@ export interface CreateUserData {
   role: 'ADMIN' | 'USER';
 }
 
+export interface UpdateUserData extends Partial<Omit<UserData, 'id'>> {
+  password?: string;
+}
+
 export const getUsers = () => 
   apiClient.get<UserData[]>('/users').then(response => response.data);
 
 export const createUser = (userData: CreateUserData) => 
   apiClient.post<UserData>('/users', userData).then(response => response.data);
 
-export const updateUser = (id: string, userData: Partial<UserData>) => 
+export const updateUser = (id: string, userData: UpdateUserData) => 
   apiClient.put<UserData>(`/users/${id}`, userData).then(response => response.data);
 
 export const getUserById = (id: string): Promise<UserData> => 

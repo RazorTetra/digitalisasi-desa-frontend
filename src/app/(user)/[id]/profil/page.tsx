@@ -1,4 +1,3 @@
-// src/app/(user)/[id]/profil/page.tsx
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -82,11 +81,13 @@ const ProfilePage: React.FC = () => {
         email: data.email,
       }
 
-      if (data.password) {
-        updatedData.password = data.password
+      // Only include password if it's provided and we're updating the current user's profile
+      if (data.password && currentUser?.id === user.id) {
+        await updateUser(user.id, { ...updatedData, password: data.password })
+      } else {
+        await updateUser(user.id, updatedData)
       }
 
-      await updateUser(user.id, updatedData)
       setUpdateSuccess(true)
       setUpdateError(null)
       setIsEditing(false)
