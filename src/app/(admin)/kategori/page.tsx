@@ -35,7 +35,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Pencil, Trash2, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Kategori, getAllKategori, createKategori, updateKategori, deleteKategori } from "@/api/announcementApi";
 
@@ -68,7 +68,7 @@ const KategoriPage: React.FC = () => {
     try {
       const data = await getAllKategori();
       setKategori(data);
-    } catch (error) {
+    } catch  {
       toast({
         title: "Error",
         description: "Gagal memuat data kategori. Silakan coba lagi nanti.",
@@ -97,7 +97,7 @@ const KategoriPage: React.FC = () => {
       fetchKategori();
       form.reset();
       setEditingKategori(null);
-    } catch (error) {
+    } catch  {
       toast({
         title: "Error",
         description: "Gagal menyimpan kategori. Silakan coba lagi nanti.",
@@ -111,7 +111,7 @@ const KategoriPage: React.FC = () => {
       await deleteKategori(id);
       toast({ title: "Sukses", description: "Kategori berhasil dihapus" });
       fetchKategori();
-    } catch (error) {
+    } catch  {
       toast({
         title: "Error",
         description: "Gagal menghapus kategori. Silakan coba lagi nanti.",

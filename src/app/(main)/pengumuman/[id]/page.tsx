@@ -30,7 +30,7 @@ const PengumumanDetailPage: React.FC = () => {
     try {
       const data = await getPengumumanById(pengumumanId)
       setPengumuman(data)
-    } catch (error) {
+    } catch  {
       toast({
         title: "Error",
         description: "Gagal memuat detail pengumuman. Silakan coba lagi nanti.",
@@ -46,7 +46,7 @@ const PengumumanDetailPage: React.FC = () => {
     try {
       const data = await getAllKategori()
       setKategori(data)
-    } catch (error) {
+    } catch  {
       toast({
         title: "Error",
         description: "Gagal memuat kategori. Silakan coba lagi nanti.",
