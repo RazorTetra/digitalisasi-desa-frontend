@@ -1,4 +1,4 @@
-// src/app/page.tsx
+// src/app/(main)/page.tsx
 "use client"
 
 import React, { useState, useEffect } from 'react'
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { ArrowRight, Newspaper, Info, UserCheck, FileText, TrendingUp, Bell, Mountain } from "lucide-react"
 import Link from "next/link"
+import { getAllPengumuman, Pengumuman as APIPengumuman } from '@/api/announcementApi'
 
 // Types
 interface ServiceItem {
@@ -14,12 +15,6 @@ interface ServiceItem {
   desc: string;
   link: string;
   icon: React.ElementType;
-}
-
-interface NewsItem {
-  title: string;
-  excerpt: string;
-  date: string;
 }
 
 interface FeatureItem {
@@ -37,11 +32,18 @@ const services: ServiceItem[] = [
   { title: 'Pariwisata Desa', desc: 'Potensi wisata Desa Tandengan', link: '/pariwisata', icon: Mountain },
 ];
 
+interface NewsItem {
+  title: string;
+  excerpt: string;
+  date: string;
+}
+
 const newsItems: NewsItem[] = [
   { title: "Pembangunan Jalan Desa Selesai", excerpt: "Proyek pembangunan jalan desa sepanjang 5 km telah rampung...", date: "2024-03-15" },
   { title: "Program Vaksinasi COVID-19 Tahap 2", excerpt: "Pemerintah desa mengumumkan jadwal vaksinasi COVID-19 tahap kedua...", date: "2024-03-10" },
   { title: "Pelatihan Digital untuk UMKM", excerpt: "Desa Tandengan mengadakan pelatihan pemasaran digital untuk UMKM lokal...", date: "2024-03-05" },
 ];
+
 
 const featureItems: FeatureItem[] = [
   { title: "Administrasi Online", icon: "📄" },
@@ -89,6 +91,9 @@ const DigitalElement: React.FC<{ delay: number }> = ({ delay }) => {
 
 export default function Home(): JSX.Element {
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [pengumuman, setPengumuman] = useState<APIPengumuman[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const slides = ["Selamat Datang di", "Desa Tandengan", "Digital"]
 
   useEffect(() => {
@@ -97,6 +102,24 @@ export default function Home(): JSX.Element {
     }, 3000)
     return () => clearInterval(timer)
   }, [slides.length])
+
+  useEffect(() => {
+    const fetchPengumuman = async () => {
+      try {
+        const data = await getAllPengumuman()
+        // Sort pengumuman by date, newest first
+        const sortedPengumuman = data.sort((a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime())
+        setPengumuman(sortedPengumuman.slice(0, 3)) // Get only the 3 most recent announcements
+      } catch (err) {
+        setError('Gagal memuat pengumuman')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPengumuman()
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-primary/10">
@@ -183,15 +206,22 @@ export default function Home(): JSX.Element {
             <div className="w-full md:w-2/3">
               <h2 className="text-2xl md:text-3xl font-semibold mb-6">Pengumuman</h2>
               <Card>
-                <CardHeader>
-                  <CardTitle>Informasi Penting</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-4">
-                    <li>Jadwal vaksinasi COVID-19 tahap kedua telah diumumkan.</li>
-                    <li>Pendaftaran program bantuan UMKM dibuka mulai 1 April 2024.</li>
-                    <li>Penutupan jalan desa untuk perbaikan pada 10-15 April 2024.</li>
-                  </ul>
+                <CardContent className='mt-4'>
+                  {loading ? (
+                    <p>Memuat pengumuman...</p>
+                  ) : error ? (
+                    <p className="text-red-500">{error}</p>
+                  ) : (
+                    <ul className="space-y-4">
+                      {pengumuman.map((item) => (
+                        <li key={item.id}>
+                          <h4 className="font-semibold">{item.judul}</h4>
+                          <p className="text-sm text-muted-foreground">{new Date(item.tanggal).toLocaleDateString()}</p>
+                          <p>{item.isi.substring(0, 100)}...</p>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </CardContent>
               </Card>
             </div>

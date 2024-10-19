@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ModeToggle } from '@/components/theme-toggle';
-import { Menu } from 'lucide-react';
+import { Menu, LayoutDashboard } from 'lucide-react';
 import { logout } from '@/api/authApi';
 import { User } from '@/api/authApi';
 import { PersonIcon } from '@radix-ui/react-icons';
@@ -62,6 +62,12 @@ const Navbar = () => {
               <Link href="/informasi-desa" className="text-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
                 Tentang Kami
               </Link>
+              {user && user.role === 'ADMIN' && (
+                <Link href="/dashboard" className="text-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
+                  <LayoutDashboard className="inline-block mr-2 h-4 w-4" />
+                  Dashboard
+                </Link>
+              )}
             </div>
           </div>
           <div className="hidden md:block">
@@ -127,6 +133,12 @@ const Navbar = () => {
             <Link href="/informasi-desa" className="text-foreground hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
               Tentang Kami
             </Link>
+            {user && user.role === 'ADMIN' && (
+              <Link href="/dashboard" className="text-foreground hover:text-primary block px-3 py-2 rounded-md text-base font-medium">
+                <LayoutDashboard className="inline-block mr-2 h-4 w-4" />
+                Dashboard
+              </Link>
+            )}
             {user ? (
               <>
                 <span className="block px-3 py-2 text-sm font-medium">Halo, {user.namaDepan}</span>

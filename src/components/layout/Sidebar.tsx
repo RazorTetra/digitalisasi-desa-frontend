@@ -23,7 +23,8 @@ import {
   Building2,
   Image,
   Share2,
-  Bell
+  Bell,
+  Home
 } from "lucide-react";
 import { logout } from "@/api/authApi";
 import {
@@ -52,6 +53,11 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
+    title: "Home",
+    href: "/",
+    icon: <Home className="h-5 w-5" />,
+  },
+  {
     title: "Dashboard",
     href: "/dashboard",
     icon: <LayoutDashboard className="h-5 w-5" />,
@@ -72,6 +78,7 @@ const navItems: NavItem[] = [
     icon: <FileText className="h-5 w-5" aria-hidden="true" />,
     subItems: [
       { title: "Pengumuman", href: "/announcement", icon: <Bell className="h-4 w-4" aria-hidden="true" /> },
+      { title: "Kategori Pengumuman", href: "/kategori", icon: <FileText className="h-4 w-4" aria-hidden="true" /> },
       // Add more content management subitems here if needed
     ]
   },
