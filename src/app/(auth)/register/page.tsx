@@ -21,11 +21,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import Link from "next/link";
 import { registerSchema } from "@/schemas/registerSchema";
 import { registerUser, RegisterUserData } from "@/api/authApi";
+import { Loader2 } from "lucide-react";
 
 type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const form = useForm<RegisterForm>({
@@ -41,6 +43,8 @@ export default function RegisterPage() {
   });
 
   const onSubmit = async (data: RegisterForm) => {
+    setIsLoading(true);
+    setError(null);
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { konfirmasiPassword, ...registerData } = data;
@@ -48,6 +52,8 @@ export default function RegisterPage() {
       router.push("/login?registered=true");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Terjadi kesalahan. Silakan coba lagi nanti.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -69,7 +75,7 @@ export default function RegisterPage() {
                 <FormItem>
                   <FormLabel>Nama Depan</FormLabel>
                   <FormControl>
-                    <Input placeholder="John" {...field} />
+                    <Input placeholder="John" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -82,7 +88,7 @@ export default function RegisterPage() {
                 <FormItem>
                   <FormLabel>Nama Belakang</FormLabel>
                   <FormControl>
-                    <Input placeholder="Doe" {...field} />
+                    <Input placeholder="Doe" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -95,7 +101,7 @@ export default function RegisterPage() {
                 <FormItem>
                   <FormLabel>Nomor HP</FormLabel>
                   <FormControl>
-                    <Input placeholder="08123456789" {...field} />
+                    <Input placeholder="08123456789" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -108,7 +114,7 @@ export default function RegisterPage() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="nama@example.com" {...field} />
+                    <Input placeholder="nama@example.com" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -121,7 +127,7 @@ export default function RegisterPage() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="********" {...field} />
+                    <Input type="password" placeholder="********" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -134,7 +140,7 @@ export default function RegisterPage() {
                 <FormItem>
                   <FormLabel>Konfirmasi Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="********" {...field} />
+                    <Input type="password" placeholder="********" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -145,8 +151,15 @@ export default function RegisterPage() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            <Button type="submit" className="w-full">
-              Daftar
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Mendaftar...
+                </>
+              ) : (
+                "Daftar"
+              )}
             </Button>
           </form>
         </Form>
