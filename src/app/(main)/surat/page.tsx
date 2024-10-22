@@ -1,129 +1,154 @@
-// src/app/(main)/surat/page.tsx
 "use client"
 
-import React from 'react'
-import { useAuth } from '@/hooks/useAuth'
+import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { FileDown, FileText, LogIn } from 'lucide-react'
-import Link from 'next/link'
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { FileDown, Loader2, PhoneCall, Mail, MapPin } from 'lucide-react'
+import { motion } from "framer-motion"
+import { getAllFormatSurat, FormatSurat } from '@/api/suratApi'
 
-// Dummy data untuk contoh surat
-const contohSurat = [
-  { id: 1, nama: "Surat Keterangan Belum Pernah Kawin", file: "/surat/belum-kawin.pdf" },
-  { id: 2, nama: "Surat Keterangan Perbedaan Nama", file: "/surat/perbedaan-nama.pdf" },
-  { id: 3, nama: "Surat Keterangan Berkelakuan Baik", file: "/surat/berkelakuan-baik.pdf" },
-  { id: 4, nama: "Surat Keterangan Berdomisili", file: "/surat/berdomisili.pdf" },
-  { id: 5, nama: "Surat Keterangan Kurang Mampu", file: "/surat/kurang-mampu.pdf" },
-  { id: 6, nama: "Surat Keterangan Usaha", file: "/surat/keterangan-usaha.pdf" },
+const KontakInfo = [
+  { icon: <PhoneCall className="h-4 w-4" />, text: "(0123) 456-7890" },
+  { icon: <Mail className="h-4 w-4" />, text: "administrasi@desatandengan.go.id" },
+  { icon: <MapPin className="h-4 w-4" />, text: "Jl. Desa Tandengan No. 123" }
+]
+
+const InformasiPenting = [
+  "Pastikan mengisi format surat dengan data yang benar dan valid",
+  "Surat yang memerlukan legalisasi harus dibawa ke kantor desa",
+  "Dokumen dapat diisi secara digital atau dicetak",
+  "Untuk beberapa jenis surat mungkin diperlukan dokumen pendukung tambahan",
+  "Jika ada kesulitan dalam pengisian, silakan hubungi kantor desa"
 ]
 
 const SuratPage: React.FC = () => {
-  const { user, loading } = useAuth()
+  const [formatSurat, setFormatSurat] = useState<FormatSurat[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  if (loading) {
-    return <div>Loading...</div>
-  }
+  useEffect(() => {
+    const fetchFormatSurat = async () => {
+      try {
+        const data = await getAllFormatSurat()
+        setFormatSurat(data)
+        setError(null)
+      } catch {
+        setError("Gagal memuat daftar format surat. Silakan coba lagi nanti.")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchFormatSurat()
+  }, [])
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-center">Layanan Administrasi Surat</h1>
+    <motion.div 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      transition={{ duration: 0.5 }}
+      className="container mx-auto px-4 py-8"
+    >
+      <h1 className="text-4xl font-bold mb-8 text-center">Layanan Administrasi Surat</h1>
 
-      {!user && (
-        <Alert className="mb-8">
-          <AlertTitle>Buat Akun untuk Mengajukan Permohonan Surat</AlertTitle>
-          <AlertDescription>
-            Untuk mengajukan permohonan surat, Anda perlu memiliki akun. 
-            <Link href="/register" className="ml-2 underline">
-              Daftar sekarang
-            </Link> atau 
-            <Link href="/login" className="ml-2 underline">
-              Login
-            </Link> jika sudah memiliki akun.
-          </AlertDescription>
-        </Alert>
-      )}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        {/* Format Surat */}
+        <div className="md:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Format Surat</CardTitle>
+              <CardDescription>
+                Unduh format surat yang dibutuhkan di bawah ini
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="flex justify-center items-center h-32">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                </div>
+              ) : error ? (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              ) : formatSurat.length === 0 ? (
+                <div className="text-center text-muted-foreground py-8">
+                  Belum ada format surat yang tersedia
+                </div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <ul className="space-y-4">
+                    {formatSurat.map((surat) => (
+                      <motion.li
+                        key={surat.id}
+                        className="flex justify-between items-center p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                        whileHover={{ scale: 1.01 }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                      >
+                        <span className="font-medium">{surat.nama}</span>
+                        <Button variant="outline" size="sm" asChild>
+                          <a
+                            href={surat.downloadUrl}
+                            download={surat.filename}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center"
+                          >
+                            <FileDown className="mr-2 h-4 w-4" />
+                            Unduh
+                          </a>
+                        </Button>
+                      </motion.li>
+                    ))}
+                  </ul>
+                </motion.div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-        <Card>
-          <CardHeader>
-            <CardTitle>Contoh Surat</CardTitle>
-            <CardDescription>
-              Unduh contoh surat untuk referensi
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-4">
-              {contohSurat.map((surat) => (
-                <li key={surat.id} className="flex justify-between items-center">
-                  <span>{surat.nama}</span>
-                  <Button variant="outline" size="sm" asChild>
-                    <a href={surat.file} download>
-                      <FileDown className="mr-2 h-4 w-4" />
-                      Unduh
-                    </a>
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Ajukan Permohonan Surat</CardTitle>
-            <CardDescription>
-              {user 
-                ? "Pilih jenis surat yang ingin Anda ajukan"
-                : "Login untuk mengajukan permohonan surat"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {user ? (
+        {/* Informasi Kontak */}
+        <div>
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Kontak Kami</CardTitle>
+              <CardDescription>
+                Hubungi kami jika ada pertanyaan
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
               <ul className="space-y-4">
-                {contohSurat.map((surat) => (
-                  <li key={surat.id}>
-                    <Button variant="outline" className="w-full justify-start">
-                      <FileText className="mr-2 h-4 w-4" />
-                      {surat.nama}
-                    </Button>
+                {KontakInfo.map((info, index) => (
+                  <li key={index} className="flex items-center space-x-2 text-sm">
+                    {info.icon}
+                    <span>{info.text}</span>
                   </li>
                 ))}
               </ul>
-            ) : (
-              <div className="text-center">
-                <p className="mb-4">Anda perlu login untuk mengajukan permohonan surat.</p>
-                <Button asChild>
-                  <Link href="/login">
-                    <LogIn className="mr-2 h-4 w-4" />
-                    Login
-                  </Link>
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Informasi Penting</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="list-disc list-inside space-y-2">
-            <li>Pastikan data yang Anda masukkan saat mengajukan permohonan surat adalah benar dan akurat.</li>
-            <li>Proses pengajuan surat dapat memakan waktu 1-3 hari kerja.</li>
-            <li>Anda akan menerima notifikasi melalui email saat surat Anda siap diambil di kantor desa.</li>
-            <li>Jika ada pertanyaan, silakan hubungi kantor desa di (0123) 456-7890.</li>
-          </ul>
-        </CardContent>
-      </Card>
-    </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Informasi Penting</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2 list-disc list-inside text-sm">
+                {InformasiPenting.map((info, index) => (
+                  <li key={index}>{info}</li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </motion.div>
   )
 }
 
 export default SuratPage
-
-// TODO: Implementasi fitur untuk admin agar dapat mengelola pengumuman secara dinamis
-// Ini dapat dilakukan dengan menambahkan halaman admin dan API endpoints untuk CRUD operasi pada pengumuman

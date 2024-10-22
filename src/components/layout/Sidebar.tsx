@@ -84,6 +84,7 @@ const navItems: NavItem[] = [
     ]
   },
   { title: "Tamu Wajib Lapor", href: "/admin/tamu-wajib-lapor", icon: <UsersRound className="h-5 w-5" /> },
+  { title: "Manajemen Surat", href: "/admin/surat", icon: <FileText className="h-5 w-5" /> },
   { title: "Pengguna", href: "/admin/users", icon: <Users className="h-5 w-5" /> },
   { title: "Pengaturan", href: "/admin/settings", icon: <Settings className="h-5 w-5" /> },
 ];
