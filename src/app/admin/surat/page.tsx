@@ -52,19 +52,36 @@ const ACCEPTED_FILE_TYPES = [
   "application/pdf" // .pdf
 ];
 
+// Schema yang tidak menggunakan FileList untuk kompatibilitas SSR
 const formatSuratSchema = z.object({
   nama: z.string().min(1, "Nama format surat harus diisi"),
-  file: z
-    .instanceof(FileList)
-    .refine((files) => files.length > 0, "File harus dipilih")
-    .refine(
-      (files) => files[0]?.size <= MAX_FILE_SIZE,
-      "Ukuran file maksimal 5MB"
-    )
-    .refine(
-      (files) => ACCEPTED_FILE_TYPES.includes(files[0]?.type),
-      "Format file harus .doc, .docx, atau .pdf"
-    ),
+  file: z.any()
+    .optional()
+    .superRefine((file, ctx) => {
+      if (!file || !file[0]) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "File harus dipilih",
+        });
+        return;
+      }
+
+      if (file[0].size > MAX_FILE_SIZE) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Ukuran file maksimal 5MB",
+        });
+        return;
+      }
+
+      if (!ACCEPTED_FILE_TYPES.includes(file[0].type)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Format file harus .doc, .docx, atau .pdf",
+        });
+        return;
+      }
+    }),
 });
 
 type FormatSuratForm = z.infer<typeof formatSuratSchema>;
@@ -106,6 +123,8 @@ const AdminSuratPage: React.FC = () => {
   }, [user, fetchFormatSurat])
 
   const onSubmit = async (data: FormatSuratForm) => {
+    if (!data.file?.[0]) return;
+
     setIsUploading(true)
     try {
       const formData = new FormData()
