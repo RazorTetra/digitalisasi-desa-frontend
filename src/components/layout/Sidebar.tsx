@@ -24,7 +24,8 @@ import {
   Image,
   Share2,
   Bell,
-  Home
+  Home,
+  UsersRound
 } from "lucide-react";
 import { logout } from "@/api/authApi";
 import {
@@ -82,6 +83,7 @@ const navItems: NavItem[] = [
       // Add more content management subitems here if needed
     ]
   },
+  { title: "Tamu Wajib Lapor", href: "/admin/tamu-wajib-lapor", icon: <UsersRound className="h-5 w-5" /> },
   { title: "Pengguna", href: "/admin/users", icon: <Users className="h-5 w-5" /> },
   { title: "Pengaturan", href: "/admin/settings", icon: <Settings className="h-5 w-5" /> },
 ];
