@@ -85,6 +85,16 @@ const navItems: NavItem[] = [
   },
   { title: "Tamu Wajib Lapor", href: "/admin/tamu-wajib-lapor", icon: <UsersRound className="h-5 w-5" /> },
   { title: "Manajemen Surat", href: "/admin/surat", icon: <FileText className="h-5 w-5" /> },
+  {
+    title: "Keuangan",
+    icon: <FileText className="h-5 w-5" aria-hidden="true" />,
+    subItems: [
+      { title: "Laporan keuangan", href: "/admin/keuangan", icon: <FileText className="h-5 w-5" /> },
+      { title: "Banner", href: "/admin/keuangan/banner", icon: <FileText className="h-4 w-4" aria-hidden="true" /> },
+      // Add more content management subitems here if needed
+    ]
+  },
+  
   { title: "Pengguna", href: "/admin/users", icon: <Users className="h-5 w-5" /> },
   { title: "Pengaturan", href: "/admin/settings", icon: <Settings className="h-5 w-5" /> },
 ];
