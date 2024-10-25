@@ -1,13 +1,35 @@
 // src/app/(main)/page.tsx
-"use client"
+"use client";
 
-import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence, Variants } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { ArrowRight, Newspaper, Info, UserCheck, FileText, TrendingUp, Bell, Mountain } from "lucide-react"
-import Link from "next/link"
-import { getAllPengumuman, Pengumuman as APIPengumuman } from '@/api/announcementApi'
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence, Variants } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import {
+  ArrowRight,
+  Newspaper,
+  Info,
+  UserCheck,
+  FileText,
+  TrendingUp,
+  Bell,
+  Mountain,
+} from "lucide-react";
+import Link from "next/link";
+import {
+  getAllPengumuman,
+  Pengumuman as APIPengumuman,
+} from "@/api/announcementApi";
+import { Berita, getAllBerita } from "@/api/beritaApi";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
+import Image from "next/image";
 
 // Types
 interface ServiceItem {
@@ -24,30 +46,46 @@ interface FeatureItem {
 
 // Constants
 const services: ServiceItem[] = [
-  { title: 'Informasi Desa', desc: 'Sejarah dan struktur perangkat desa', link: '/informasi-desa', icon: Info },
-  { title: 'Tamu Wajib Lapor', desc: 'Lapor dalam 1x24 jam', link: '/tamu-wajib-lapor', icon: UserCheck },
-  { title: 'Surat Menyurat', desc: 'Layanan administrasi surat', link: '/surat', icon: FileText },
-  { title: 'Keuangan', desc: 'Informasi keuangan desa', link: '/keuangan', icon: TrendingUp },
-  { title: 'Pengumuman', desc: 'Informasi dan pengumuman resmi', link: '/pengumuman', icon: Bell },
-  { title: 'Pariwisata Desa', desc: 'Potensi wisata Desa Tandengan', link: '/pariwisata', icon: Mountain },
+  {
+    title: "Informasi Desa",
+    desc: "Sejarah dan struktur perangkat desa",
+    link: "/informasi-desa",
+    icon: Info,
+  },
+  {
+    title: "Tamu Wajib Lapor",
+    desc: "Lapor dalam 1x24 jam",
+    link: "/tamu-wajib-lapor",
+    icon: UserCheck,
+  },
+  {
+    title: "Surat Menyurat",
+    desc: "Layanan administrasi surat",
+    link: "/surat",
+    icon: FileText,
+  },
+  {
+    title: "Keuangan",
+    desc: "Informasi keuangan desa",
+    link: "/keuangan",
+    icon: TrendingUp,
+  },
+  {
+    title: "Pengumuman",
+    desc: "Informasi dan pengumuman resmi",
+    link: "/pengumuman",
+    icon: Bell,
+  },
+  {
+    title: "Pariwisata Desa",
+    desc: "Potensi wisata Desa Tandengan",
+    link: "/pariwisata",
+    icon: Mountain,
+  },
 ];
-
-interface NewsItem {
-  title: string;
-  excerpt: string;
-  date: string;
-}
-
-const newsItems: NewsItem[] = [
-  { title: "Pembangunan Jalan Desa Selesai", excerpt: "Proyek pembangunan jalan desa sepanjang 5 km telah rampung...", date: "2024-03-15" },
-  { title: "Program Vaksinasi COVID-19 Tahap 2", excerpt: "Pemerintah desa mengumumkan jadwal vaksinasi COVID-19 tahap kedua...", date: "2024-03-10" },
-  { title: "Pelatihan Digital untuk UMKM", excerpt: "Desa Tandengan mengadakan pelatihan pemasaran digital untuk UMKM lokal...", date: "2024-03-05" },
-];
-
 
 const featureItems: FeatureItem[] = [
-  { title: "Administrasi Online", icon: "📄" },
-  { title: "Pengaduan Masyarakat", icon: "🗣️" }
+  { title: "Pengaduan Masyarakat", icon: "🗣️" },
 ];
 
 // Animations
@@ -56,18 +94,18 @@ const containerVariants: Variants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1
-    }
-  }
-}
+      staggerChildren: 0.1,
+    },
+  },
+};
 
 const itemVariants: Variants = {
   hidden: { y: 20, opacity: 0 },
   visible: {
     y: 0,
-    opacity: 1
-  }
-}
+    opacity: 1,
+  },
+};
 
 const DigitalElement: React.FC<{ delay: number }> = ({ delay }) => {
   return (
@@ -83,43 +121,63 @@ const DigitalElement: React.FC<{ delay: number }> = ({ delay }) => {
         duration: 4,
         delay: delay,
         repeat: Infinity,
-        repeatType: "loop"
+        repeatType: "loop",
       }}
     />
-  )
-}
+  );
+};
 
 export default function Home(): JSX.Element {
-  const [currentSlide, setCurrentSlide] = useState(0)
-  const [pengumuman, setPengumuman] = useState<APIPengumuman[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const slides = ["Selamat Datang di", "Desa Tandengan", "Digital"]
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [pengumuman, setPengumuman] = useState<APIPengumuman[]>([]);
+  const [berita, setBerita] = useState<Berita[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const slides = ["Selamat Datang di", "Desa Tandengan", "Digital"];
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length)
-    }, 3000)
-    return () => clearInterval(timer)
-  }, [slides.length])
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [slides.length]);
 
   useEffect(() => {
-    const fetchPengumuman = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getAllPengumuman()
-        // Sort pengumuman by date, newest first
-        const sortedPengumuman = data.sort((a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime())
-        setPengumuman(sortedPengumuman.slice(0, 3)) // Get only the 3 most recent announcements
-      } catch (err) {
-        setError('Gagal memuat pengumuman')
-        console.error(err)
-      } finally {
-        setLoading(false)
-      }
-    }
+        // Fetch both pengumuman and berita concurrently
+        const [pengumumanData, beritaData] = await Promise.all([
+          getAllPengumuman(),
+          getAllBerita(),
+        ]);
 
-    fetchPengumuman()
-  }, [])
+        // Sort and slice pengumuman
+        const sortedPengumuman = pengumumanData
+          .sort(
+            (a, b) =>
+              new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime()
+          )
+          .slice(0, 3);
+        setPengumuman(sortedPengumuman);
+
+        // Sort and slice berita
+        const sortedBerita = beritaData
+          .sort(
+            (a, b) =>
+              new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime()
+          )
+          .slice(0, 3);
+        setBerita(sortedBerita);
+      } catch (err) {
+        setError("Gagal memuat data");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-primary/10">
@@ -143,26 +201,29 @@ export default function Home(): JSX.Element {
               {slides[currentSlide]}
             </motion.h1>
           </AnimatePresence>
-          <motion.p 
+          <motion.p
             className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.5 }}
           >
-            Menuju pelayanan publik yang efisien, transparan, dan inovatif untuk kesejahteraan masyarakat desa.
+            Menuju pelayanan publik yang efisien, transparan, dan inovatif untuk
+            kesejahteraan masyarakat desa.
           </motion.p>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 1 }}
           >
-            <Button size="lg" className="text-lg px-8 py-6">
-              Berita Terkini
-              <Newspaper className="ml-2 h-5 w-5" />
-            </Button>
+            <Link href="/berita">
+              <Button size="lg" className="text-lg px-8 py-6">
+                Berita Terkini
+                <Newspaper className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
           </motion.div>
         </div>
-        <motion.div 
+        <motion.div
           className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
@@ -177,7 +238,9 @@ export default function Home(): JSX.Element {
           <div className="flex flex-col md:flex-row gap-8">
             {/* Featured Services */}
             <div className="w-full md:w-1/3">
-              <h2 className="text-2xl md:text-3xl font-semibold mb-6">Layanan Unggulan</h2>
+              <h2 className="text-2xl md:text-3xl font-semibold mb-6">
+                Layanan Unggulan
+              </h2>
               <div className="space-y-4">
                 {featureItems.map((item, index) => (
                   <motion.div
@@ -201,23 +264,43 @@ export default function Home(): JSX.Element {
                 ))}
               </div>
             </div>
-            
+
             {/* Announcements */}
             <div className="w-full md:w-2/3">
-              <h2 className="text-2xl md:text-3xl font-semibold mb-6">Pengumuman</h2>
+              <h2 className="text-2xl md:text-3xl font-semibold mb-6">
+                Pengumuman
+              </h2>
               <Card>
-                <CardContent className='mt-4'>
+                <CardContent className="mt-4">
                   {loading ? (
-                    <p>Memuat pengumuman...</p>
+                    <div className="space-y-4">
+                      {[...Array(3)].map((_, i) => (
+                        <div key={i} className="animate-pulse">
+                          <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+                          <div className="h-3 bg-muted rounded w-1/4 mb-2"></div>
+                          <div className="h-3 bg-muted rounded w-full"></div>
+                        </div>
+                      ))}
+                    </div>
                   ) : error ? (
                     <p className="text-red-500">{error}</p>
                   ) : (
                     <ul className="space-y-4">
                       {pengumuman.map((item) => (
                         <li key={item.id}>
-                          <h4 className="font-semibold">{item.judul}</h4>
-                          <p className="text-sm text-muted-foreground">{new Date(item.tanggal).toLocaleDateString()}</p>
-                          <p>{item.isi.substring(0, 100)}...</p>
+                          <Link href={`/pengumuman/${item.id}`}>
+                            <h4 className="font-semibold hover:text-primary transition-colors">
+                              {item.judul}
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                              {format(new Date(item.tanggal), "dd MMMM yyyy", {
+                                locale: id,
+                              })}
+                            </p>
+                            <p className="line-clamp-2 text-muted-foreground">
+                              {item.isi}
+                            </p>
+                          </Link>
                         </li>
                       ))}
                     </ul>
@@ -233,7 +316,7 @@ export default function Home(): JSX.Element {
       <section className="py-20 px-4">
         <div className="container mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12">Layanan Kami</h2>
-          <motion.div 
+          <motion.div
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
             variants={containerVariants}
             initial="hidden"
@@ -252,8 +335,11 @@ export default function Home(): JSX.Element {
                   </CardHeader>
                   <CardContent className="flex-grow" />
                   <div className="p-6 pt-0">
-                    <Link href={service.link} className="flex items-center text-primary hover:underline">
-                      Lihat Detail 
+                    <Link
+                      href={service.link}
+                      className="flex items-center text-primary hover:underline"
+                    >
+                      Lihat Detail
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </div>
@@ -267,42 +353,107 @@ export default function Home(): JSX.Element {
       {/* News Section */}
       <section className="py-16 bg-secondary">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Berita Terkini</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Berita Terkini
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Main News */}
-            <motion.div 
-              className="md:col-span-2"
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Card className="h-full">
-                <CardContent className="p-6">
-                  <h3 className="text-2xl font-semibold mb-4">{newsItems[0].title}</h3>
-                  <p className="text-muted-foreground mb-4">{newsItems[0].excerpt}</p>
-                  <p className="text-sm text-muted-foreground">{newsItems[0].date}</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-            
-            {/* Other News */}
+            {berita.length > 0 && (
+              <motion.div
+                className="md:col-span-2"
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Link href={`/berita/${berita[0].slug}`}>
+                  <Card className="h-full overflow-hidden">
+                    <div className="relative h-64">
+                      {berita[0].gambarUrl && (
+                        <>
+                          <Image
+                            src={berita[0].gambarUrl}
+                            alt={berita[0].judul}
+                            fill
+                            className="object-cover"
+                            priority
+                          />
+                          {/* Gradient overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
+                          <div className="absolute inset-0 p-6 flex flex-col justify-end text-white">
+                            <h3 className="text-2xl font-semibold mb-2 hover:text-primary/90 transition-colors">
+                              {berita[0].judul}
+                            </h3>
+                            <p className="text-white/80 mb-2 line-clamp-2">
+                              {berita[0].ringkasan}
+                            </p>
+                            <p className="text-sm text-white/60">
+                              {format(
+                                new Date(berita[0].tanggal),
+                                "dd MMMM yyyy",
+                                { locale: id }
+                              )}
+                            </p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </Card>
+                </Link>
+              </motion.div>
+            )}
+
+            {/* Berita lainnya */}
             <div className="space-y-6">
-              {newsItems.slice(1).map((item, index) => (
-                <motion.div 
-                  key={index}
+              {berita.slice(1).map((item, index) => (
+                <motion.div
+                  key={item.id}
                   initial={{ opacity: 0, x: 50 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
-                  <Card>
-                    <CardContent className="p-4">
-                      <h4 className="text-lg font-semibold mb-2">{item.title}</h4>
-                      <p className="text-sm text-muted-foreground mb-2">{item.excerpt}</p>
-                      <p className="text-xs text-muted-foreground">{item.date}</p>
-                    </CardContent>
-                  </Card>
+                  <Link href={`/berita/${item.slug}`}>
+                    <Card className="overflow-hidden">
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="relative h-24">
+                          <Image
+                            src={item.gambarUrl}
+                            alt={item.judul}
+                            fill
+                            className="object-cover rounded-l"
+                          />
+                        </div>
+                        <div className="col-span-2 p-4">
+                          <h4 className="font-semibold mb-2 line-clamp-2 hover:text-primary transition-colors">
+                            {item.judul}
+                          </h4>
+                          <p className="text-xs text-muted-foreground">
+                            {format(new Date(item.tanggal), "dd MMMM yyyy", {
+                              locale: id,
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    </Card>
+                  </Link>
                 </motion.div>
               ))}
+              {loading && (
+                <div className="space-y-6">
+                  {[...Array(2)].map((_, i) => (
+                    <div key={i} className="animate-pulse">
+                      <Card>
+                        <div className="grid grid-cols-3 gap-4 p-4">
+                          <div className="bg-muted h-24 rounded" />
+                          <div className="col-span-2 space-y-2">
+                            <div className="h-4 bg-muted rounded w-3/4" />
+                            <div className="h-3 bg-muted rounded w-1/4" />
+                          </div>
+                        </div>
+                      </Card>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           <div className="text-center mt-8">
@@ -316,5 +467,5 @@ export default function Home(): JSX.Element {
         </div>
       </section>
     </div>
-  )
+  );
 }
