@@ -25,7 +25,13 @@ import {
   Share2,
   Bell,
   Home,
-  UsersRound,
+  ImageUp,
+  GalleryThumbnails,
+  Banknote,
+  Newspaper,
+  Sunset,
+  MailQuestion,
+  Speech,
 } from "lucide-react";
 import { logout } from "@/api/authApi";
 import {
@@ -88,6 +94,11 @@ const navItems: NavItem[] = [
         href: "/admin/village/village-social-media",
         icon: <Share2 className="h-4 w-4" aria-hidden="true" />,
       },
+      {
+        title: "Gambar Halaman Utama",
+        href: "/admin/index-image",
+        icon: <ImageUp className="h-5 w-5" />,
+      },
     ],
   },
   {
@@ -107,39 +118,44 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    title: "Tamu Wajib Lapor",
-    href: "/admin/tamu-wajib-lapor",
-    icon: <UsersRound className="h-5 w-5" />,
-  },
-  {
     title: "Manajemen Surat",
     href: "/admin/surat",
-    icon: <FileText className="h-5 w-5" />,
+    icon: <MailQuestion className="h-5 w-5" />,
+  },
+  {
+    title: "Tamu Wajib Lapor",
+    href: "/admin/tamu-wajib-lapor",
+    icon: <Speech className="h-5 w-5" />,
+  },
+  {
+    title: "Pariwisata",
+    href: "/admin/pariwisata",
+    icon: <Sunset className="h-5 w-5" />,
   },
   {
     title: "Keuangan",
-    icon: <FileText className="h-5 w-5" aria-hidden="true" />,
+    icon: <Banknote className="h-5 w-5" aria-hidden="true" />,
     subItems: [
       {
         title: "Laporan keuangan",
         href: "/admin/keuangan",
-        icon: <FileText className="h-5 w-5" />,
+        icon: <Banknote className="h-5 w-5" />,
       },
       {
         title: "Banner",
         href: "/admin/keuangan/banner",
-        icon: <FileText className="h-4 w-4" aria-hidden="true" />,
+        icon: <GalleryThumbnails className="h-4 w-4" aria-hidden="true" />,
       },
     ],
   },
   {
     title: "Berita",
-    icon: <FileText className="h-5 w-5" aria-hidden="true" />,
+    icon: <Newspaper className="h-5 w-5" aria-hidden="true" />,
     subItems: [
       {
         title: "berita",
         href: "/admin/berita",
-        icon: <Users className="h-5 w-5" />,
+        icon: <Newspaper className="h-5 w-5" />,
       },
       {
         title: "Kategori Berita",
@@ -149,11 +165,6 @@ const navItems: NavItem[] = [
     ],
   },
 
-  {
-    title: "Gambar Halaman Utama",
-    href: "/admin/index-image",
-    icon: <Users className="h-5 w-5" />,
-  },
   {
     title: "Pengguna",
     href: "/admin/users",
