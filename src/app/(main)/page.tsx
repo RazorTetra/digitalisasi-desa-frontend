@@ -30,6 +30,7 @@ import { Berita, getAllBerita } from "@/api/beritaApi";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import Image from "next/image";
+import { getHeroBanner, type HeroBanner } from "@/api/heroBannerApi";
 
 // Types
 interface ServiceItem {
@@ -107,32 +108,13 @@ const itemVariants: Variants = {
   },
 };
 
-const DigitalElement: React.FC<{ delay: number }> = ({ delay }) => {
-  return (
-    <motion.div
-      className="absolute w-2 h-2 bg-primary rounded-full"
-      style={{
-        top: `${Math.random() * 100}%`,
-        left: `${Math.random() * 100}%`,
-      }}
-      initial={{ scale: 0, opacity: 0 }}
-      animate={{ scale: [0, 1, 1, 0], opacity: [0, 1, 1, 0] }}
-      transition={{
-        duration: 4,
-        delay: delay,
-        repeat: Infinity,
-        repeatType: "loop",
-      }}
-    />
-  );
-};
-
 export default function Home(): JSX.Element {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [pengumuman, setPengumuman] = useState<APIPengumuman[]>([]);
   const [berita, setBerita] = useState<Berita[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [heroBanner, setHeroBanner] = useState<HeroBanner | null>(null);
   const slides = ["Selamat Datang di", "Desa Tandengan", "Digital"];
 
   useEffect(() => {
@@ -146,9 +128,10 @@ export default function Home(): JSX.Element {
     const fetchData = async () => {
       try {
         // Fetch both pengumuman and berita concurrently
-        const [pengumumanData, beritaData] = await Promise.all([
+        const [pengumumanData, beritaData, bannerData] = await Promise.all([
           getAllPengumuman(),
           getAllBerita(),
+          getHeroBanner(),
         ]);
 
         // Sort and slice pengumuman
@@ -168,6 +151,7 @@ export default function Home(): JSX.Element {
           )
           .slice(0, 3);
         setBerita(sortedBerita);
+        setHeroBanner(bannerData);
       } catch (err) {
         setError("Gagal memuat data");
         console.error(err);
@@ -184,10 +168,22 @@ export default function Home(): JSX.Element {
       {/* Hero Section */}
       <section className="h-screen flex items-center justify-center relative overflow-hidden">
         <div className="absolute inset-0">
-          {Array.from({ length: 50 }).map((_, i) => (
-            <DigitalElement key={i} delay={i * 0.1} />
-          ))}
+          {heroBanner?.imageUrl ? (
+            <>
+              <Image
+                src={heroBanner.imageUrl}
+                alt="Desa Tandengan"
+                fill
+                priority
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background/90" />
+            </>
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-b from-background to-background/60" />
+          )}
         </div>
+
         <div className="container mx-auto px-4 text-center relative z-10">
           <AnimatePresence mode="wait">
             <motion.h1
@@ -202,7 +198,7 @@ export default function Home(): JSX.Element {
             </motion.h1>
           </AnimatePresence>
           <motion.p
-            className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto"
+            className="text-xl md:text-2xl font-bold mb-8 max-w-3xl mx-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.5 }}
@@ -215,21 +211,22 @@ export default function Home(): JSX.Element {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 1 }}
           >
-            <Link href="/berita">
-              <Button size="lg" className="text-lg px-8 py-6">
-                Berita Terkini
-                <Newspaper className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
+            <Button
+              size="lg"
+              className="text-lg px-8 py-6"
+              onClick={() => {
+                const newsSection = document.querySelector(".bg-secondary");
+                newsSection?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              Layanan
+              <Newspaper className="ml-2 h-5 w-5" />
+            </Button>
           </motion.div>
         </div>
-        <motion.div
-          className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <ArrowRight className="h-10 w-10 text-primary" />
-        </motion.div>
+
+        {/* Bottom Shadow/Gradient untuk transisi halus */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
       </section>
 
       {/* Featured Services and Announcements Section */}

@@ -25,7 +25,7 @@ import {
   Share2,
   Bell,
   Home,
-  UsersRound
+  UsersRound,
 } from "lucide-react";
 import { logout } from "@/api/authApi";
 import {
@@ -67,45 +67,103 @@ const navItems: NavItem[] = [
     title: "Informasi Desa",
     icon: <Info className="h-5 w-5" aria-hidden="true" />,
     subItems: [
-      { title: "Sejarah Desa", href: "/admin/village/village-info", icon: <FileText className="h-4 w-4" aria-hidden="true" /> },
-      { title: "Struktur Desa", href: "/admin/village/village-structure", icon: <Building2 className="h-4 w-4" aria-hidden="true" /> },
-      // eslint-disable-next-line jsx-a11y/alt-text
-      { title: "Galeri Desa", href: "/admin/village/village-gallery", icon: <Image className="h-4 w-4" aria-hidden="true" /> },
-      { title: "Media Sosial", href: "/admin/village/village-social-media", icon: <Share2 className="h-4 w-4" aria-hidden="true" /> },
-    ]
+      {
+        title: "Sejarah Desa",
+        href: "/admin/village/village-info",
+        icon: <FileText className="h-4 w-4" aria-hidden="true" />,
+      },
+      {
+        title: "Struktur Desa",
+        href: "/admin/village/village-structure",
+        icon: <Building2 className="h-4 w-4" aria-hidden="true" />,
+      },
+      {
+        title: "Galeri Desa",
+        href: "/admin/village/village-gallery",
+        // eslint-disable-next-line jsx-a11y/alt-text
+        icon: <Image className="h-4 w-4" aria-hidden="true" />,
+      },
+      {
+        title: "Media Sosial",
+        href: "/admin/village/village-social-media",
+        icon: <Share2 className="h-4 w-4" aria-hidden="true" />,
+      },
+    ],
   },
   {
     title: "Manajemen Konten",
     icon: <FileText className="h-5 w-5" aria-hidden="true" />,
     subItems: [
-      { title: "Pengumuman", href: "/admin/announcement", icon: <Bell className="h-4 w-4" aria-hidden="true" /> },
-      { title: "Kategori Pengumuman", href: "/admin/kategori", icon: <FileText className="h-4 w-4" aria-hidden="true" /> },
-      // Add more content management subitems here if needed
-    ]
+      {
+        title: "Pengumuman",
+        href: "/admin/announcement",
+        icon: <Bell className="h-4 w-4" aria-hidden="true" />,
+      },
+      {
+        title: "Kategori Pengumuman",
+        href: "/admin/kategori",
+        icon: <FileText className="h-4 w-4" aria-hidden="true" />,
+      },
+    ],
   },
-  { title: "Tamu Wajib Lapor", href: "/admin/tamu-wajib-lapor", icon: <UsersRound className="h-5 w-5" /> },
-  { title: "Manajemen Surat", href: "/admin/surat", icon: <FileText className="h-5 w-5" /> },
+  {
+    title: "Tamu Wajib Lapor",
+    href: "/admin/tamu-wajib-lapor",
+    icon: <UsersRound className="h-5 w-5" />,
+  },
+  {
+    title: "Manajemen Surat",
+    href: "/admin/surat",
+    icon: <FileText className="h-5 w-5" />,
+  },
   {
     title: "Keuangan",
     icon: <FileText className="h-5 w-5" aria-hidden="true" />,
     subItems: [
-      { title: "Laporan keuangan", href: "/admin/keuangan", icon: <FileText className="h-5 w-5" /> },
-      { title: "Banner", href: "/admin/keuangan/banner", icon: <FileText className="h-4 w-4" aria-hidden="true" /> },
-      // Add more content management subitems here if needed
-    ]
+      {
+        title: "Laporan keuangan",
+        href: "/admin/keuangan",
+        icon: <FileText className="h-5 w-5" />,
+      },
+      {
+        title: "Banner",
+        href: "/admin/keuangan/banner",
+        icon: <FileText className="h-4 w-4" aria-hidden="true" />,
+      },
+    ],
   },
   {
     title: "Berita",
     icon: <FileText className="h-5 w-5" aria-hidden="true" />,
     subItems: [
-      { title: "berita", href: "/admin/berita", icon: <Users className="h-5 w-5" /> },
-            { title: "Kategori Berita", href: "/admin/berita-kategori", icon: <FileText className="h-4 w-4" aria-hidden="true" /> },
-      // Add more content management subitems here if needed
-    ]
+      {
+        title: "berita",
+        href: "/admin/berita",
+        icon: <Users className="h-5 w-5" />,
+      },
+      {
+        title: "Kategori Berita",
+        href: "/admin/berita-kategori",
+        icon: <FileText className="h-4 w-4" aria-hidden="true" />,
+      },
+    ],
   },
-  
-  { title: "Pengguna", href: "/admin/users", icon: <Users className="h-5 w-5" /> },
-  { title: "Pengaturan", href: "/admin/settings", icon: <Settings className="h-5 w-5" /> },
+
+  {
+    title: "Gambar Halaman Utama",
+    href: "/admin/index-image",
+    icon: <Users className="h-5 w-5" />,
+  },
+  {
+    title: "Pengguna",
+    href: "/admin/users",
+    icon: <Users className="h-5 w-5" />,
+  },
+  {
+    title: "Pengaturan",
+    href: "/admin/settings",
+    icon: <Settings className="h-5 w-5" />,
+  },
 ];
 
 interface SidebarProps {
@@ -122,7 +180,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
   const router = useRouter();
 
   useEffect(() => {
-    const userDataString = localStorage.getItem('userData');
+    const userDataString = localStorage.getItem("userData");
     if (userDataString) {
       setUser(JSON.parse(userDataString));
     }
@@ -150,7 +208,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
   const handleLogout = async () => {
     try {
       await logout();
-      localStorage.removeItem('userData');
+      localStorage.removeItem("userData");
       router.push("/login");
     } catch (error) {
       console.error("Logout failed:", error);
@@ -158,8 +216,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
   };
 
   const sidebarVariants = {
-    expanded: { width: '256px' },
-    collapsed: { width: '64px' },
+    expanded: { width: "256px" },
+    collapsed: { width: "64px" },
   };
 
   const mobileMenuVariants = {
@@ -181,7 +239,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
       <motion.aside
         className="hidden md:flex h-screen bg-background border-r flex-col fixed left-0 top-0"
         initial="expanded"
-        animate={isCollapsed ? 'collapsed' : 'expanded'}
+        animate={isCollapsed ? "collapsed" : "expanded"}
         variants={sidebarVariants}
         transition={{ duration: 0.3 }}
       >
@@ -222,7 +280,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed }) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Apakah Anda yakin ingin keluar?</AlertDialogTitle>
             <AlertDialogDescription>
-              Anda akan keluar dari akun Anda. Untuk mengakses kembali, Anda perlu login ulang.
+              Anda akan keluar dari akun Anda. Untuk mengakses kembali, Anda
+              perlu login ulang.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -275,7 +334,11 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
             {item.subItems ? (
               <Collapsible
                 open={openDropdown === item.title}
-                onOpenChange={() => setOpenDropdown(openDropdown === item.title ? null : item.title)}
+                onOpenChange={() =>
+                  setOpenDropdown(
+                    openDropdown === item.title ? null : item.title
+                  )
+                }
               >
                 <CollapsibleTrigger asChild>
                   <Button
@@ -297,7 +360,7 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
                 </CollapsibleTrigger>
                 <CollapsibleContent className="pl-6 space-y-2">
                   {item.subItems.map((subItem) => (
-                    <Link key={subItem.title} href={subItem.href || ''}>
+                    <Link key={subItem.title} href={subItem.href || ""}>
                       <Button
                         variant="ghost"
                         className={cn(
@@ -307,14 +370,16 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
                         )}
                       >
                         {subItem.icon}
-                        {!isCollapsed && <span className="ml-2">{subItem.title}</span>}
+                        {!isCollapsed && (
+                          <span className="ml-2">{subItem.title}</span>
+                        )}
                       </Button>
                     </Link>
                   ))}
                 </CollapsibleContent>
               </Collapsible>
             ) : (
-              <Link href={item.href || ''}>
+              <Link href={item.href || ""}>
                 <Button
                   variant="ghost"
                   className={cn(
