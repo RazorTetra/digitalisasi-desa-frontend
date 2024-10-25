@@ -40,11 +40,6 @@ interface ServiceItem {
   icon: React.ElementType;
 }
 
-interface FeatureItem {
-  title: string;
-  icon: string;
-}
-
 // Constants
 const services: ServiceItem[] = [
   {
@@ -85,9 +80,6 @@ const services: ServiceItem[] = [
   },
 ];
 
-const featureItems: FeatureItem[] = [
-  { title: "Pengaduan Masyarakat", icon: "🗣️" },
-];
 
 // Animations
 const containerVariants: Variants = {
@@ -232,38 +224,9 @@ export default function Home(): JSX.Element {
       {/* Featured Services and Announcements Section */}
       <section className="py-16 bg-secondary">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row gap-8">
-            {/* Featured Services */}
-            <div className="w-full md:w-1/3">
-              <h2 className="text-2xl md:text-3xl font-semibold mb-6">
-                Layanan Unggulan
-              </h2>
-              <div className="space-y-4">
-                {featureItems.map((item, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    whileHover={{ scale: 1.05 }}
-                    className="bg-background p-4 rounded-lg shadow-md flex items-center cursor-pointer"
-                  >
-                    <motion.span
-                      className="text-3xl mr-4"
-                      initial={{ rotateY: 0 }}
-                      whileHover={{ rotateY: 180 }}
-                      transition={{ duration: 0.6 }}
-                    >
-                      {item.icon}
-                    </motion.span>
-                    <h3 className="text-lg font-semibold">{item.title}</h3>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
+          <div className="flex">
             {/* Announcements */}
-            <div className="w-full md:w-2/3">
+            <div className="w-full">
               <h2 className="text-2xl md:text-3xl font-semibold mb-6">
                 Pengumuman
               </h2>
