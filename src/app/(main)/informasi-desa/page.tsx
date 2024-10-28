@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Facebook, Instagram, Twitter, Mail } from 'lucide-react'
 import { getVillageInfo, getVillageStructure, getGallery, getSocialMedia } from '@/api/villageApi'
 import { VillageInfo, VillageStructure, GalleryImage, SocialMedia } from '@/api/villageApi'
-import { Dialog, DialogContent, DialogOverlay } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogOverlay, DialogTitle } from '@/components/ui/dialog'
 
 const InformasiDesaPage: React.FC = () => {
   const [villageInfo, setVillageInfo] = useState<VillageInfo | null>(null)
@@ -142,6 +142,7 @@ const VillageGalleryCard: React.FC<{ gallery: GalleryImage[] }> = ({ gallery }) 
       {/* Modal for Fullscreen Image */}
       {selectedImage && (
         <Dialog open={Boolean(selectedImage)} onOpenChange={() => setSelectedImage(null)}>
+          <DialogTitle />
           <DialogOverlay />
           <DialogContent className="w-full max-w-3xl">
             <motion.div
