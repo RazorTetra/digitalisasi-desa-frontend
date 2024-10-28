@@ -103,13 +103,13 @@ const Navbar = () => {
                       Login
                     </Button>
                   </Link>
-                  <Link href="/register">
+                  {/* <Link href="/register">
                     <Button 
                       variant="outline" 
                       className="ml-2 hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
                     >Daftar
                     </Button>
-                  </Link>
+                  </Link> */}
                 </>
               )}
             </div>
@@ -169,14 +169,14 @@ const Navbar = () => {
                     Login
                   </Button>
                 </Link>
-                <Link href="/register" className="block w-full">
+                {/* <Link href="/register" className="block w-full">
                   <Button 
                     variant="outline" 
                     className="w-full text-left justify-start hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
                   >
                     Daftar
                   </Button>
-                </Link>
+                </Link> */}
               </>
             )}
           </div>

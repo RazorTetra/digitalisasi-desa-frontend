@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Facebook, Instagram, Twitter, Mail } from 'lucide-react'
 import { getVillageInfo, getVillageStructure, getGallery, getSocialMedia } from '@/api/villageApi'
 import { VillageInfo, VillageStructure, GalleryImage, SocialMedia } from '@/api/villageApi'
+import { Dialog, DialogContent, DialogOverlay } from '@/components/ui/dialog'
 
 const InformasiDesaPage: React.FC = () => {
   const [villageInfo, setVillageInfo] = useState<VillageInfo | null>(null)
@@ -109,29 +110,59 @@ const VillageHistoryCard: React.FC<{ history: string | undefined }> = ({ history
   </Card>
 )
 
-const VillageGalleryCard: React.FC<{ gallery: GalleryImage[] }> = ({ gallery }) => (
-  <div className="mb-12">
-    <h2 className="text-2xl font-semibold mb-6 text-primary">Galeri Desa</h2>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {gallery.map((image) => (
-        <div key={image.id} className="relative aspect-square rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-          <Image
-            src={image.imageUrl}
-            alt={image.description || "Gambar Desa"}
-            layout="fill"
-            objectFit="cover"
-            className="rounded-lg transition-transform duration-300 hover:scale-110"
-          />
-          {image.description && (
-            <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white p-2 text-sm">
-              {image.description}
-            </div>
-          )}
-        </div>
-      ))}
+const VillageGalleryCard: React.FC<{ gallery: GalleryImage[] }> = ({ gallery }) => {
+  const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
+
+  return (
+    <div className="mb-12">
+      <h2 className="text-2xl font-semibold mb-6 text-primary">Galeri Desa</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {gallery.map((image) => (
+          <div
+            key={image.id}
+            className="relative aspect-square rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
+            onClick={() => setSelectedImage(image)} // Set image for modal view
+          >
+            <Image
+              src={image.imageUrl}
+              alt={image.description || 'Gambar Desa'}
+              layout="fill"
+              objectFit="cover"
+              className="rounded-lg transition-transform duration-300 hover:scale-110"
+            />
+            {image.description && (
+              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white p-2 text-sm">
+                {image.description}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Modal for Fullscreen Image */}
+      {selectedImage && (
+        <Dialog open={Boolean(selectedImage)} onOpenChange={() => setSelectedImage(null)}>
+          <DialogOverlay />
+          <DialogContent className="w-full max-w-3xl">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="relative w-full h-96"
+            >
+              <Image
+                src={selectedImage.imageUrl}
+                alt={selectedImage.description || 'Gambar Desa'}
+                layout="fill"
+                objectFit="contain"
+              />
+            </motion.div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
-  </div>
-)
+  );
+};
 
 const VillageSocialMediaCard: React.FC<{ socialMedia: SocialMedia[] }> = ({ socialMedia }) => (
   <div className="bg-card rounded-lg p-8 text-center">

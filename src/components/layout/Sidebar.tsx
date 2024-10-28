@@ -15,7 +15,6 @@ import {
   LayoutDashboard,
   Users,
   FileText,
-  Settings,
   Menu,
   LogOut,
   ChevronDown,
@@ -169,12 +168,7 @@ const navItems: NavItem[] = [
     title: "Pengguna",
     href: "/admin/users",
     icon: <Users className="h-5 w-5" />,
-  },
-  {
-    title: "Pengaturan",
-    href: "/admin/settings",
-    icon: <Settings className="h-5 w-5" />,
-  },
+  }
 ];
 
 interface SidebarProps {

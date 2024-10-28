@@ -25,10 +25,10 @@ export default function UnauthorizedPage() {
         </CardHeader>
         <CardContent>
           <p>Maaf, Anda tidak memiliki izin untuk mengakses halaman ini.</p>
-          <p>Anda akan diarahkan ke halaman login dalam 5 detik.</p>
+          <p>Anda akan diarahkan ke halaman utama dalam 5 detik.</p>
         </CardContent>
         <CardFooter>
-          <Button onClick={() => router.push('/login')} className="w-full">
+          <Button onClick={() => router.push('/')} className="w-full">
             Pergi ke Login
           </Button>
         </CardFooter>
