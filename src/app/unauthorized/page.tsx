@@ -11,7 +11,7 @@ export default function UnauthorizedPage() {
 
   useEffect(() => {
     const redirectTimer = setTimeout(() => {
-      router.push('/login')
+      router.push('/')
     }, 5000)
 
     return () => clearTimeout(redirectTimer)
@@ -29,7 +29,7 @@ export default function UnauthorizedPage() {
         </CardContent>
         <CardFooter>
           <Button onClick={() => router.push('/')} className="w-full">
-            Pergi ke Login
+            Kembali
           </Button>
         </CardFooter>
       </Card>

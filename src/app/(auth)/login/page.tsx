@@ -16,9 +16,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import Link from "next/link";
 import { loginUser, LoginData } from "@/api/authApi";
 import { Loader2 } from "lucide-react";
 
@@ -64,12 +63,9 @@ export default function LoginPage() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle>Login</CardTitle>
-        <CardDescription>
-          Masuk ke akun Anda untuk mengakses layanan Desa Tandengan Digital
-        </CardDescription>
+        <CardTitle className="text-center">LOGIN</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="w-96">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -116,14 +112,14 @@ export default function LoginPage() {
           </form>
         </Form>
       </CardContent>
-      <CardFooter className="flex justify-center">
+      {/* <CardFooter className="flex justify-center">
         <p className="text-sm text-muted-foreground">
           Belum punya akun?{" "}
           <Link href="/register" className="text-primary hover:underline">
             Daftar di sini
           </Link>
         </p>
-      </CardFooter>
+      </CardFooter> */}
     </Card>
   );
 }
