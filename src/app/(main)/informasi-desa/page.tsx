@@ -1,17 +1,18 @@
+// src/app/(main)/informasi-desa/page.tsx
 "use client"
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Facebook, Instagram, Twitter, Mail } from 'lucide-react'
 import { getVillageInfo, getVillageStructure, getGallery, getSocialMedia } from '@/api/villageApi'
-import { VillageInfo, VillageStructure, GalleryImage, SocialMedia } from '@/api/villageApi'
-import { Dialog, DialogContent, DialogOverlay, DialogTitle } from '@/components/ui/dialog'
+import type { VillageInfo, VillageStructure, GalleryImage, SocialMedia } from '@/api/villageApi'
+import { OrganizationChart } from './_components/OrganizationChart'
 
 const InformasiDesaPage: React.FC = () => {
   const [villageInfo, setVillageInfo] = useState<VillageInfo | null>(null)
@@ -20,6 +21,7 @@ const InformasiDesaPage: React.FC = () => {
   const [socialMedia, setSocialMedia] = useState<SocialMedia[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [, setSelectedImage] = useState<GalleryImage | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,7 +48,15 @@ const InformasiDesaPage: React.FC = () => {
   }, [])
 
   if (loading) {
-    return <LoadingSkeleton />
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Skeleton className="h-12 w-3/4 mx-auto mb-12" />
+        <div className="space-y-8">
+          <Skeleton className="h-64" />
+          <Skeleton className="h-[600px]" />
+        </div>
+      </div>
+    )
   }
 
   if (error) {
@@ -67,117 +77,99 @@ const InformasiDesaPage: React.FC = () => {
       >
         Informasi Desa Tandengan
       </motion.h1>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-        <VillageHistoryCard history={villageInfo?.history} />
-        <VillageStructureCard structures={structures} />
-      </div>
-      
-      <VillageGalleryCard gallery={gallery} />
-      <VillageSocialMediaCard socialMedia={socialMedia} />
+
+      <Tabs defaultValue="profile" className="space-y-8">
+        <TabsList className="grid w-full grid-cols-3 lg:w-[400px] mx-auto">
+          <TabsTrigger value="profile">Profil</TabsTrigger>
+          <TabsTrigger value="structure">Struktur</TabsTrigger>
+          <TabsTrigger value="gallery">Galeri</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="profile" className="space-y-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Sejarah Desa</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-foreground leading-relaxed">
+                {villageInfo?.history || "Belum ada informasi sejarah desa."}
+              </p>
+            </CardContent>
+          </Card>
+
+          <VillageSocialMediaCard socialMedia={socialMedia} />
+        </TabsContent>
+
+        <TabsContent value="structure">
+          <OrganizationChart structures={structures} />
+        </TabsContent>
+
+        <TabsContent value="gallery">
+          <Card>
+            <CardHeader>
+              <CardTitle>Galeri Desa</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {gallery.map((image) => (
+                  <motion.div
+                    key={image.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                    className="relative aspect-square rounded-lg overflow-hidden cursor-pointer"
+                    onClick={() => setSelectedImage(image)}
+                  >
+                    <Image
+                      src={image.imageUrl}
+                      alt={image.description || 'Gambar Desa'}
+                      fill
+                      className="object-cover transition-transform duration-300 hover:scale-110"
+                    />
+                    {image.description && (
+                      <div className="absolute inset-x-0 bottom-0 bg-black/60 p-2">
+                        <p className="text-white text-sm">{image.description}</p>
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
 
-const VillageStructureCard: React.FC<{ structures: VillageStructure[] }> = ({ structures }) => (
-  <Card className="bg-card">
+const VillageSocialMediaCard: React.FC<{ socialMedia: SocialMedia[] }> = ({ socialMedia }) => (
+  <Card>
     <CardHeader>
-      <CardTitle className="text-2xl text-primary">Struktur Desa</CardTitle>
+      <CardTitle>Media Sosial</CardTitle>
     </CardHeader>
     <CardContent>
-      <Accordion type="single" collapsible className="w-full">
-        {structures.map((item, index) => (
-          <AccordionItem key={item.id} value={`item-${index}`}>
-            <AccordionTrigger className="text-primary hover:text-primary/80">{item.position}</AccordionTrigger>
-            <AccordionContent className="text-foreground/80">{item.name}</AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
-    </CardContent>
-  </Card>
-)
-
-const VillageHistoryCard: React.FC<{ history: string | undefined }> = ({ history }) => (
-  <Card className="bg-card">
-    <CardHeader>
-      <CardTitle className="text-2xl text-primary">Sejarah Desa</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <p className="text-foreground leading-relaxed">
-        {history || "Belum ada informasi sejarah desa."}
-      </p>
-    </CardContent>
-  </Card>
-)
-
-const VillageGalleryCard: React.FC<{ gallery: GalleryImage[] }> = ({ gallery }) => {
-  const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
-
-  return (
-    <div className="mb-12">
-      <h2 className="text-2xl font-semibold mb-6 text-primary">Galeri Desa</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {gallery.map((image) => (
-          <div
-            key={image.id}
-            className="relative aspect-square rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
-            onClick={() => setSelectedImage(image)} // Set image for modal view
+      <div className="flex justify-center space-x-4">
+        {socialMedia.map((item) => (
+          <Button 
+            key={item.id} 
+            variant="outline" 
+            size="icon" 
+            className="rounded-full hover:bg-primary hover:text-primary-foreground"
+            asChild
           >
-            <Image
-              src={image.imageUrl}
-              alt={image.description || 'Gambar Desa'}
-              layout="fill"
-              objectFit="cover"
-              className="rounded-lg transition-transform duration-300 hover:scale-110"
-            />
-            {image.description && (
-              <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-60 text-white p-2 text-sm">
-                {image.description}
-              </div>
-            )}
-          </div>
+            <a 
+              href={item.url} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              aria-label={`Follow us on ${item.platform}`}
+            >
+              {getSocialMediaIcon(item.platform)}
+            </a>
+          </Button>
         ))}
       </div>
-
-      {/* Modal for Fullscreen Image */}
-      {selectedImage && (
-        <Dialog open={Boolean(selectedImage)} onOpenChange={() => setSelectedImage(null)}>
-          <DialogTitle />
-          <DialogOverlay />
-          <DialogContent className="w-full max-w-3xl">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-              className="relative w-full h-96"
-            >
-              <Image
-                src={selectedImage.imageUrl}
-                alt={selectedImage.description || 'Gambar Desa'}
-                layout="fill"
-                objectFit="contain"
-              />
-            </motion.div>
-          </DialogContent>
-        </Dialog>
-      )}
-    </div>
-  );
-};
-
-const VillageSocialMediaCard: React.FC<{ socialMedia: SocialMedia[] }> = ({ socialMedia }) => (
-  <div className="bg-card rounded-lg p-8 text-center">
-    <h2 className="text-2xl font-semibold mb-6 text-primary">Ikuti Kami</h2>
-    <div className="flex justify-center space-x-4">
-      {socialMedia.map((item) => (
-        <Button key={item.id} variant="outline" size="icon" className="rounded-full hover:bg-primary hover:text-primary-foreground" asChild>
-          <a href={item.url} target="_blank" rel="noopener noreferrer" aria-label={`Follow us on ${item.platform}`}>
-            {getSocialMediaIcon(item.platform)}
-          </a>
-        </Button>
-      ))}
-    </div>
-  </div>
+    </CardContent>
+  </Card>
 )
 
 const getSocialMediaIcon = (platform: string) => {
@@ -192,17 +184,5 @@ const getSocialMediaIcon = (platform: string) => {
       return <Mail className="h-5 w-5" />
   }
 }
-
-const LoadingSkeleton: React.FC = () => (
-  <div className="container mx-auto px-4 py-8">
-    <Skeleton className="h-12 w-3/4 mx-auto mb-12" />
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-      <Skeleton className="h-64" />
-      <Skeleton className="h-64" />
-    </div>
-    <Skeleton className="h-96 mb-12" />
-    <Skeleton className="h-24" />
-  </div>
-)
 
 export default InformasiDesaPage

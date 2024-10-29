@@ -1,87 +1,106 @@
 // src/app/(main)/pengumuman/page.tsx
-"use client"
+"use client";
 
-import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { AlertCircle, Calendar, Search, ChevronLeft, ChevronRight } from 'lucide-react'
-import Link from 'next/link'
-import { useToast } from "@/hooks/use-toast"
-import { Pengumuman, Kategori, getAllPengumuman, getAllKategori } from '@/api/announcementApi'
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  AlertCircle,
+  Calendar,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import Link from "next/link";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Pengumuman,
+  Kategori,
+  getAllPengumuman,
+  getAllKategori,
+} from "@/api/announcementApi";
 
-const ITEMS_PER_PAGE = 5
+const ITEMS_PER_PAGE = 5;
 
 const PengumumanPage: React.FC = () => {
-  const [pengumuman, setPengumuman] = useState<Pengumuman[]>([])
-  const [kategori, setKategori] = useState<Kategori[]>([])
-  const [filteredPengumuman, setFilteredPengumuman] = useState<Pengumuman[]>([])
-  const [searchTerm, setSearchTerm] = useState('')
-  const [activeTab, setActiveTab] = useState('all')
-  const [currentPage, setCurrentPage] = useState(1)
-  const [isLoading, setIsLoading] = useState(true)
-  const { toast } = useToast()
+  const [pengumuman, setPengumuman] = useState<Pengumuman[]>([]);
+  const [kategori, setKategori] = useState<Kategori[]>([]);
+  const [filteredPengumuman, setFilteredPengumuman] = useState<Pengumuman[]>(
+    []
+  );
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
-    fetchPengumuman()
-    fetchKategori()
-  }, [])
+    fetchPengumuman();
+    fetchKategori();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchPengumuman = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const data = await getAllPengumuman()
-      setPengumuman(data)
-      setFilteredPengumuman(data)
-    } catch  {
+      const data = await getAllPengumuman();
+      setPengumuman(data);
+      setFilteredPengumuman(data);
+    } catch {
       toast({
         title: "Error",
         description: "Gagal memuat pengumuman. Silakan coba lagi nanti.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const fetchKategori = async () => {
     try {
-      const data = await getAllKategori()
-      setKategori(data)
-    } catch  {
+      const data = await getAllKategori();
+      setKategori(data);
+    } catch {
       toast({
         title: "Error",
         description: "Gagal memuat kategori. Silakan coba lagi nanti.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   useEffect(() => {
-    const filtered = pengumuman.filter(item =>
-      (item.judul.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.isi.toLowerCase().includes(searchTerm.toLowerCase())) &&
-      (activeTab === 'all' || item.kategoriId === activeTab)
-    )
-    setFilteredPengumuman(filtered)
-    setCurrentPage(1)
-  }, [searchTerm, activeTab, pengumuman])
+    const filtered = pengumuman.filter(
+      (item) =>
+        (item.judul.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.isi.toLowerCase().includes(searchTerm.toLowerCase())) &&
+        (activeTab === "all" || item.kategoriId === activeTab)
+    );
+    setFilteredPengumuman(filtered);
+    setCurrentPage(1);
+  }, [searchTerm, activeTab, pengumuman]);
 
   const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' }
-    return new Date(dateString).toLocaleDateString('id-ID', options)
-  }
+    const options: Intl.DateTimeFormatOptions = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+    return new Date(dateString).toLocaleDateString("id-ID", options);
+  };
 
   const paginatedPengumuman = filteredPengumuman.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
-  )
+  );
 
-  const totalPages = Math.ceil(filteredPengumuman.length / ITEMS_PER_PAGE)
+  const totalPages = Math.ceil(filteredPengumuman.length / ITEMS_PER_PAGE);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -104,11 +123,7 @@ const PengumumanPage: React.FC = () => {
             Semua
           </TabsTrigger>
           {kategori.map((category) => (
-            <TabsTrigger
-              key={category.id}
-              value={category.id}
-              className="m-1"
-            >
+            <TabsTrigger key={category.id} value={category.id} className="m-1">
               {category.nama}
             </TabsTrigger>
           ))}
@@ -134,9 +149,12 @@ const PengumumanPage: React.FC = () => {
                 <Card>
                   <CardHeader>
                     <div className="flex justify-between items-start">
-                      <CardTitle className="text-xl font-bold">{item.judul}</CardTitle>
+                      <CardTitle className="text-xl font-bold">
+                        {item.judul}
+                      </CardTitle>
                       <Badge variant="secondary">
-                        {kategori.find(k => k.id === item.kategoriId)?.nama || 'Tidak ada kategori'}
+                        {kategori.find((k) => k.id === item.kategoriId)?.nama ||
+                          "Tidak ada kategori"}
                       </Badge>
                     </div>
                     <div className="flex items-center text-sm text-gray-500">
@@ -145,9 +163,13 @@ const PengumumanPage: React.FC = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-600">{item.isi.substring(0, 150)}...</p>
+                    <p className="text-gray-600">
+                      {item.isi.substring(0, 150)}...
+                    </p>
                     <Link href={`/pengumuman/${item.id}`}>
-                      <Button variant="link" className="mt-4 p-0">Baca selengkapnya</Button>
+                      <Button variant="link" className="mt-4 p-0">
+                        Baca selengkapnya
+                      </Button>
                     </Link>
                   </CardContent>
                 </Card>
@@ -160,7 +182,9 @@ const PengumumanPage: React.FC = () => {
               className="flex flex-col items-center justify-center h-full"
             >
               <AlertCircle className="h-16 w-16 text-gray-400 mb-4" />
-              <p className="text-xl font-semibold text-gray-600">Tidak ada pengumuman ditemukan</p>
+              <p className="text-xl font-semibold text-gray-600">
+                Tidak ada pengumuman ditemukan
+              </p>
             </motion.div>
           )}
         </AnimatePresence>
@@ -171,16 +195,20 @@ const PengumumanPage: React.FC = () => {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span>{currentPage} dari {totalPages}</span>
+          <span>
+            {currentPage} dari {totalPages}
+          </span>
           <Button
             variant="outline"
             size="icon"
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
             disabled={currentPage === totalPages}
           >
             <ChevronRight className="h-4 w-4" />
@@ -188,7 +216,7 @@ const PengumumanPage: React.FC = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default PengumumanPage
+export default PengumumanPage;

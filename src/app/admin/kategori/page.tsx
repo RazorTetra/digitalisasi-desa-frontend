@@ -37,7 +37,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Pencil, Trash2, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { Kategori, getAllKategori, createKategori, updateKategori, deleteKategori } from "@/api/announcementApi";
+import {
+  Kategori,
+  getAllKategori,
+  createKategori,
+  updateKategori,
+  deleteKategori,
+} from "@/api/announcementApi";
 
 const kategoriSchema = z.object({
   nama: z.string().min(1, "Nama kategori harus diisi"),
@@ -61,6 +67,7 @@ const KategoriPage: React.FC = () => {
     if (!loading && user?.role === "ADMIN") {
       fetchKategori();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, user]);
 
   const fetchKategori = async () => {
@@ -68,7 +75,7 @@ const KategoriPage: React.FC = () => {
     try {
       const data = await getAllKategori();
       setKategori(data);
-    } catch  {
+    } catch {
       toast({
         title: "Error",
         description: "Gagal memuat data kategori. Silakan coba lagi nanti.",
@@ -97,7 +104,7 @@ const KategoriPage: React.FC = () => {
       fetchKategori();
       form.reset();
       setEditingKategori(null);
-    } catch  {
+    } catch {
       toast({
         title: "Error",
         description: "Gagal menyimpan kategori. Silakan coba lagi nanti.",
@@ -111,7 +118,7 @@ const KategoriPage: React.FC = () => {
       await deleteKategori(id);
       toast({ title: "Sukses", description: "Kategori berhasil dihapus" });
       fetchKategori();
-    } catch  {
+    } catch {
       toast({
         title: "Error",
         description: "Gagal menghapus kategori. Silakan coba lagi nanti.",
@@ -136,7 +143,10 @@ const KategoriPage: React.FC = () => {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mb-6">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-4 mb-6"
+            >
               <FormField
                 control={form.control}
                 name="nama"
@@ -150,12 +160,18 @@ const KategoriPage: React.FC = () => {
                   </FormItem>
                 )}
               />
-              <Button type="submit">{editingKategori ? 'Perbarui' : 'Tambah'} Kategori</Button>
+              <Button type="submit">
+                {editingKategori ? "Perbarui" : "Tambah"} Kategori
+              </Button>
               {editingKategori && (
-                <Button type="button" variant="outline" onClick={() => {
-                  setEditingKategori(null);
-                  form.reset();
-                }}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setEditingKategori(null);
+                    form.reset();
+                  }}
+                >
                   Batal
                 </Button>
               )}
@@ -179,12 +195,12 @@ const KategoriPage: React.FC = () => {
                   <TableRow key={item.id}>
                     <TableCell>{item.nama}</TableCell>
                     <TableCell>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="sm"
                         onClick={() => {
                           setEditingKategori(item);
-                          form.setValue('nama', item.nama);
+                          form.setValue("nama", item.nama);
                         }}
                       >
                         <Pencil className="h-4 w-4" />
@@ -197,14 +213,19 @@ const KategoriPage: React.FC = () => {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
+                            <AlertDialogTitle>
+                              Apakah Anda yakin?
+                            </AlertDialogTitle>
                             <AlertDialogDescription>
-                              Tindakan ini tidak dapat dibatalkan. Ini akan menghapus kategori secara permanen.
+                              Tindakan ini tidak dapat dibatalkan. Ini akan
+                              menghapus kategori secara permanen.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Batal</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(item.id)}>
+                            <AlertDialogAction
+                              onClick={() => handleDelete(item.id)}
+                            >
                               Hapus
                             </AlertDialogAction>
                           </AlertDialogFooter>

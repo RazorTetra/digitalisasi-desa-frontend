@@ -106,6 +106,7 @@ const AdminPengumumanPage: React.FC = () => {
       fetchPengumuman();
       fetchKategori();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, user]);
 
   const fetchPengumuman = async () => {
@@ -113,7 +114,7 @@ const AdminPengumumanPage: React.FC = () => {
     try {
       const data = await getAllPengumuman();
       setPengumuman(data);
-    } catch  {
+    } catch {
       toast({
         title: "Error",
         description: "Gagal memuat data pengumuman. Silakan coba lagi nanti.",
@@ -128,7 +129,7 @@ const AdminPengumumanPage: React.FC = () => {
     try {
       const data = await getAllKategori();
       setKategori(data);
-    } catch  {
+    } catch {
       toast({
         title: "Error",
         description: "Gagal memuat data kategori. Silakan coba lagi nanti.",
@@ -166,7 +167,7 @@ const AdminPengumumanPage: React.FC = () => {
       await deletePengumuman(id);
       toast({ title: "Sukses", description: "Pengumuman berhasil dihapus" });
       fetchPengumuman();
-    } catch  {
+    } catch {
       toast({
         title: "Error",
         description: "Gagal menghapus pengumuman. Silakan coba lagi nanti.",

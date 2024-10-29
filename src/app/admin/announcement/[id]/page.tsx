@@ -28,7 +28,12 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { getPengumumanById, updatePengumuman, getAllKategori, Kategori } from "@/api/announcementApi";
+import {
+  getPengumumanById,
+  updatePengumuman,
+  getAllKategori,
+  Kategori,
+} from "@/api/announcementApi";
 
 const pengumumanSchema = z.object({
   judul: z.string().min(1, "Judul harus diisi"),
@@ -37,7 +42,9 @@ const pengumumanSchema = z.object({
   kategoriId: z.string().min(1, "Kategori harus dipilih"),
 });
 
-const EditPengumumanPage: React.FC<{ params: { id: string } }> = ({ params }) => {
+const EditPengumumanPage: React.FC<{ params: { id: string } }> = ({
+  params,
+}) => {
   const { user, loading } = useAuth(true);
   const [isLoading, setIsLoading] = useState(true);
   const [kategori, setKategori] = useState<Kategori[]>([]);
@@ -59,6 +66,7 @@ const EditPengumumanPage: React.FC<{ params: { id: string } }> = ({ params }) =>
       fetchPengumuman();
       fetchKategori();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, user, params.id]);
 
   const fetchPengumuman = async () => {
