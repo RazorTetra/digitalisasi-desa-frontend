@@ -101,8 +101,8 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    title: "Manajemen Konten",
-    icon: <FileText className="h-5 w-5" aria-hidden="true" />,
+    title: "Pengumuman",
+    icon: <Bell className="h-5 w-5" aria-hidden="true" />,
     subItems: [
       {
         title: "Pengumuman",
