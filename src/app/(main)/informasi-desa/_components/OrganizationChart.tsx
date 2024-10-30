@@ -78,7 +78,7 @@ export const OrganizationChart: React.FC<OrganizationChartProps> = ({ structures
     else if (pos.includes('kaur')) level = '3';
     else if (pos.includes('kasi')) level = '4';
     else if (pos.includes('jaga')) level = '5';
-    else if (pos.includes('mawateng')) level = '6';
+    else if (pos.includes('maweteng')) level = '6';
 
     return {
       ...structure,
