@@ -1,106 +1,92 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/app/(main)/keuangan/page.tsx
+"use client";
 
-"use client"
-
-import React, { useState, useEffect } from 'react'
-import Image from 'next/image'
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
+import {
+  Bar,
+  BarChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from "recharts";
+import {
+  Card,
+  CardContent,
+  CardHeader,
   CardTitle,
-  CardDescription 
-} from "@/components/ui/card"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { motion } from "framer-motion"
-import { InfoIcon, ImageIcon, Loader2 } from 'lucide-react'
-import { formatCurrency } from '@/lib/currency'
-import { 
-  getFinanceBanner, 
-  getFinanceSummary,
-  getIncomeItems,
-  getExpenseItems,
-  getFinancingItems,
+  CardDescription,
+} from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { motion } from "framer-motion";
+import { InfoIcon, ImageIcon, Loader2 } from "lucide-react";
+import { formatCurrency } from "@/lib/currency";
+import {
+  getFinanceBanner,
+  getFinanceInfo,
+  getAllPeriods,
+  getPeriodById,
   type FinanceBanner,
-  type FinanceSummary,
-  type IncomeItem,
-  type ExpenseItem,
-  type FinancingItem 
-} from '@/api/financeApi'
-import { useToast } from '@/hooks/use-toast'
-
-interface FinanceTableProps {
-  headers: string[];
-  data: Array<{
-    label: string;
-    values: (number | string)[];
-    isTotal?: boolean;
-  }>;
-}
-
-const FinanceTable: React.FC<FinanceTableProps> = ({ headers, data }) => (
-  <table className="w-full">
-    <thead className="bg-muted">
-      <tr>
-        {headers.map((header, index) => (
-          <th 
-            key={index} 
-            className={`p-2 font-medium ${index === 0 ? 'text-left' : 'text-right'}`}
-          >
-            {header}
-          </th>
-        ))}
-      </tr>
-    </thead>
-    <tbody>
-      {data.map((row, index) => (
-        <tr 
-          key={index} 
-          className={`border-b ${row.isTotal ? 'font-bold bg-muted/50' : ''}`}
-        >
-          <td className="p-2">{row.label}</td>
-          {row.values.map((value, idx) => (
-            <td key={idx} className="text-right p-2">
-              {typeof value === 'number' ? formatCurrency(value) : value}
-            </td>
-          ))}
-        </tr>
-      ))}
-    </tbody>
-  </table>
-)
+  type FinanceInfo,
+  type Period,
+  type PeriodDetail,
+} from "@/api/financeApi";
+import { useToast } from "@/hooks/use-toast";
 
 export default function KeuanganPage() {
   const { toast } = useToast();
   const [banner, setBanner] = useState<FinanceBanner | null>(null);
-  const [summary, setSummary] = useState<FinanceSummary | null>(null);
-  const [income, setIncome] = useState<IncomeItem[]>([]);
-  const [expense, setExpense] = useState<ExpenseItem[]>([]);
-  const [financing, setFinancing] = useState<FinancingItem[]>([]);
+  const [info, setInfo] = useState<FinanceInfo | null>(null);
+  const [periods, setPeriods] = useState<Period[]>([]);
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("");
+  const [periodData, setPeriodData] = useState<PeriodDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingPeriod, setIsLoadingPeriod] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Load initial data (banner, info, periods)
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchInitialData = async () => {
       try {
-        const [bannerData, summaryData, incomeData, expenseData, financingData] = await Promise.all([
+        const [bannerData, infoData, periodsData] = await Promise.all([
           getFinanceBanner(),
-          getFinanceSummary(),
-          getIncomeItems(),
-          getExpenseItems(),
-          getFinancingItems()
+          getFinanceInfo(),
+          getAllPeriods(),
         ]);
 
         setBanner(bannerData);
-        setSummary(summaryData);
-        setIncome(incomeData);
-        setExpense(expenseData);
-        setFinancing(financingData);
+        setInfo(infoData);
+        setPeriods(periodsData);
+
+        // Jika ada periode, set periode terakhir sebagai default
+        if (periodsData.length > 0) {
+          // Sort descending berdasarkan tahun
+          const sortedPeriods = [...periodsData].sort(
+            (a, b) => b.tahun - a.tahun
+          );
+          const latestPeriod = sortedPeriods[0];
+          setSelectedPeriod(latestPeriod.id);
+          // Load data periode terbaru
+          handlePeriodChange(latestPeriod.id);
+        }
+
         setError(null);
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Gagal memuat data keuangan';
+        const errorMessage =
+          error instanceof Error ? error.message : "Gagal memuat data keuangan";
         setError(errorMessage);
         toast({
           title: "Error",
@@ -112,18 +98,110 @@ export default function KeuanganPage() {
       }
     };
 
-    fetchData();
+    fetchInitialData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [toast]);
 
-  const renderBanner = () => {
-    if (isLoading) {
-      return (
-        <div className="flex justify-center items-center h-[600px] bg-muted rounded-lg">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      );
+  const handlePeriodChange = async (value: string) => {
+    try {
+      setIsLoadingPeriod(true);
+      const data = await getPeriodById(value);
+      setPeriodData(data);
+      setSelectedPeriod(value);
+      setError(null);
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Gagal memuat data periode";
+      setError(errorMessage);
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingPeriod(false);
     }
+  };
 
+  const renderChart = () => {
+    if (!periodData?.summary) return null;
+
+    const chartData = [
+      {
+        name: "Pendapatan",
+        amount: periodData.summary.jumlahPendapatan,
+      },
+      {
+        name: "Belanja",
+        amount: periodData.summary.jumlahBelanja,
+      },
+      {
+        name: "Surplus/Defisit",
+        amount: periodData.summary.surplusDefisit,
+      },
+      {
+        name: "Pembiayaan Neto",
+        amount: periodData.summary.pembiayaanNeto,
+      },
+    ];
+
+    const CustomTooltip = ({ active, payload, label }: any) => {
+      if (active && payload && payload.length) {
+        return (
+          <div className="rounded-lg border bg-background p-2 shadow-md">
+            <div className="grid grid-cols-2 gap-2">
+              <span className="font-medium">{label}:</span>
+              <span className="font-medium text-right">
+                {formatCurrency(payload[0].value)}
+              </span>
+            </div>
+          </div>
+        );
+      }
+      return null;
+    };
+
+    return (
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Grafik Ringkasan Keuangan</CardTitle>
+          <CardDescription>Periode Tahun {periodData.tahun}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[400px] mt-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={chartData}>
+                <XAxis
+                  dataKey="name"
+                  tickLine={false}
+                  axisLine={false}
+                  fontSize={12}
+                  stroke="hsl(var(--muted-foreground))"
+                />
+                <YAxis
+                  tickFormatter={(value) => formatCurrency(value)}
+                  tickLine={false}
+                  axisLine={false}
+                  fontSize={12}
+                  stroke="hsl(var(--muted-foreground))"
+                />
+                <Tooltip
+                  content={<CustomTooltip />}
+                  cursor={{ fill: "hsl(var(--muted) / 0.5)" }}
+                />
+                <Bar
+                  dataKey="amount"
+                  fill="hsl(var(--primary))"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+  const renderBanner = () => {
     if (!banner?.imageUrl) {
       return (
         <div className="flex flex-col items-center justify-center h-[600px] bg-muted rounded-lg">
@@ -176,6 +254,27 @@ export default function KeuanganPage() {
           Transparansi Keuangan Desa Tandengan
         </h1>
 
+        <div className="mb-8 flex items-center gap-4">
+          <Select value={selectedPeriod} onValueChange={handlePeriodChange}>
+            <SelectTrigger className="w-[280px]">
+              <SelectValue placeholder="Pilih Periode" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Periode</SelectLabel>
+                {periods
+                  .sort((a, b) => b.tahun - a.tahun) // Sort descending
+                  .map((period) => (
+                    <SelectItem key={period.id} value={period.id}>
+                      Tahun {period.tahun}
+                    </SelectItem>
+                  ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          {isLoadingPeriod && <Loader2 className="h-4 w-4 animate-spin" />}
+        </div>
+
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -183,156 +282,145 @@ export default function KeuanganPage() {
               Baliho Keuangan Desa
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            {renderBanner()}
-          </CardContent>
+          <CardContent>{renderBanner()}</CardContent>
         </Card>
 
-        <Alert className="mb-8">
-          <InfoIcon className="h-4 w-4" />
-          <AlertTitle>Informasi Keuangan Terkini</AlertTitle>
-          <AlertDescription>
-            {summary && (
-              <>
-                Surplus/Defisit: {formatCurrency(summary.totalBelanja.surplusDefisit)}
-              </>
-            )}
-          </AlertDescription>
-        </Alert>
+        {info && (
+          <Alert className="mb-8">
+            <InfoIcon className="h-4 w-4" />
+            <AlertTitle>Informasi Keuangan</AlertTitle>
+            <AlertDescription>{info.content}</AlertDescription>
+          </Alert>
+        )}
 
-        <Tabs defaultValue="details" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="details">Detail Keuangan</TabsTrigger>
-            <TabsTrigger value="summary">Ringkasan</TabsTrigger>
-          </TabsList>
+        {isLoadingPeriod ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        ) : periodData ? (
+          <>
+            {renderChart()}
 
-          <TabsContent value="details" className="space-y-8">
-            <Card>
-              <CardHeader>
-                <CardTitle>Pendapatan</CardTitle>
-                <CardDescription>
-                  Total Anggaran: {summary && formatCurrency(summary.totalPendapatan.anggaran)}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-full">
-                  <FinanceTable 
-                    headers={['Uraian', 'Anggaran', 'Realisasi', 'Sisa']}
-                    data={[
-                      ...income.map(item => ({
-                        label: item.uraian,
-                        values: [item.anggaran, item.realisasi, item.anggaran - item.realisasi]
-                      })),
-                      {
-                        label: 'JUMLAH PENDAPATAN',
-                        values: [
-                          summary?.totalPendapatan.anggaran || 0,
-                          summary?.totalPendapatan.realisasi || 0,
-                          summary?.totalPendapatan.sisa || 0
-                        ],
-                        isTotal: true
-                      }
-                    ]}
-                  />
-                </ScrollArea>
-              </CardContent>
-            </Card>
+            <Tabs defaultValue="pendapatan" className="space-y-8">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="pendapatan">Pendapatan</TabsTrigger>
+                <TabsTrigger value="belanja">Belanja</TabsTrigger>
+                <TabsTrigger value="pembiayaan">Pembiayaan</TabsTrigger>
+              </TabsList>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Belanja</CardTitle>
-                <CardDescription>
-                  Total Realisasi: {summary && formatCurrency(summary.totalBelanja.realisasi)}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-full">
-                  <FinanceTable 
-                    headers={['Uraian', 'Anggaran', 'Realisasi', 'Sisa']}
-                    data={[
-                      ...expense.map(item => ({
-                        label: item.uraian,
-                        values: [item.anggaran, item.realisasi, item.anggaran - item.realisasi]
-                      })),
-                      {
-                        label: 'JUMLAH BELANJA',
-                        values: [
-                          summary?.totalBelanja.anggaran || 0,
-                          summary?.totalBelanja.realisasi || 0,
-                          summary?.totalBelanja.sisa || 0
-                        ],
-                        isTotal: true
-                      }
-                    ]}
-                  />
-                </ScrollArea>
-              </CardContent>
-            </Card>
+              <TabsContent value="pendapatan">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Pendapatan</CardTitle>
+                    <CardDescription>
+                      Total:{" "}
+                      {formatCurrency(periodData.summary.jumlahPendapatan)}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[400px]">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-left p-2">Uraian</th>
+                            <th className="text-right p-2">Dana</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {periodData.incomes.map((item) => (
+                            <tr key={item.id} className="border-b">
+                              <td className="p-2">{item.uraian}</td>
+                              <td className="text-right p-2">
+                                {formatCurrency(item.dana)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Pembiayaan</CardTitle>
-                <CardDescription>
-                  Pembiayaan Netto: {summary && formatCurrency(summary.totalPembiayaan.pembiayaanNetto)}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-full">
-                  <FinanceTable 
-                    headers={['Uraian', 'Jumlah']}
-                    data={[
-                      ...financing.map(item => ({
-                        label: item.uraian,
-                        values: [item.anggaran]
-                      })),
-                      {
-                        label: 'PEMBIAYAAN NETTO',
-                        values: [summary?.totalPembiayaan.pembiayaanNetto || 0],
-                        isTotal: true
-                      }
-                    ]}
-                  />
-                </ScrollArea>
-              </CardContent>
-            </Card>
-          </TabsContent>
+              <TabsContent value="belanja">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Belanja</CardTitle>
+                    <CardDescription>
+                      Total: {formatCurrency(periodData.summary.jumlahBelanja)}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[400px]">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-left p-2">Uraian</th>
+                            <th className="text-right p-2">Dana</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {periodData.expenses.map((item) => (
+                            <tr key={item.id} className="border-b">
+                              <td className="p-2">{item.uraian}</td>
+                              <td className="text-right p-2">
+                                {formatCurrency(item.dana)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-          <TabsContent value="summary">
-            <Card>
-              <CardHeader>
-                <CardTitle>Ringkasan Keuangan</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <FinanceTable 
-                  headers={['Uraian', 'Jumlah']}
-                  data={[
-                    {
-                      label: 'Total Pendapatan',
-                      values: [summary?.totalPendapatan.realisasi || 0]
-                    },
-                    {
-                      label: 'Total Belanja',
-                      values: [summary?.totalBelanja.realisasi || 0]
-                    },
-                    {
-                      label: 'Surplus/Defisit',
-                      values: [summary?.totalBelanja.surplusDefisit || 0]
-                    },
-                    {
-                      label: 'Pembiayaan Netto',
-                      values: [summary?.totalPembiayaan.pembiayaanNetto || 0]
-                    },
-                    {
-                      label: 'Sisa Lebih Pembiayaan Anggaran',
-                      values: [summary?.totalPembiayaan.sisaLebihPembiayaanAnggaran || 0],
-                      isTotal: true
-                    }
-                  ]}
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              <TabsContent value="pembiayaan">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Pembiayaan</CardTitle>
+                    <CardDescription>
+                      Total Neto:{" "}
+                      {formatCurrency(periodData.summary.pembiayaanNeto)}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[400px]">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b">
+                            <th className="text-left p-2">Uraian</th>
+                            <th className="text-center p-2">Jenis</th>
+                            <th className="text-right p-2">Dana</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {periodData.financings.map((item) => (
+                            <tr key={item.id} className="border-b">
+                              <td className="p-2">{item.uraian}</td>
+                              <td className="text-center p-2">{item.jenis}</td>
+                              <td className="text-right p-2">
+                                {formatCurrency(item.dana)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </>
+        ) : (
+          <Alert>
+            <InfoIcon className="h-4 w-4" />
+            <AlertTitle>Pilih Periode</AlertTitle>
+            <AlertDescription>
+              Silakan pilih periode untuk melihat rincian keuangan
+            </AlertDescription>
+          </Alert>
+        )}
       </motion.div>
     </div>
   );
