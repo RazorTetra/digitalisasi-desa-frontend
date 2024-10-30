@@ -1,4 +1,4 @@
-// src/app/admin/announcement/page.tsx
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
@@ -61,14 +61,16 @@ import {
   ArrowUpDown,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import Link from "next/link";
+
 import {
   Pengumuman,
   Kategori,
   getAllPengumuman,
   createPengumuman,
+  updatePengumuman,
   deletePengumuman,
   getAllKategori,
+  getPengumumanById,
 } from "@/api/announcementApi";
 
 const pengumumanSchema = z.object({
@@ -83,7 +85,9 @@ const AdminPengumumanPage: React.FC = () => {
   const [pengumuman, setPengumuman] = useState<Pengumuman[]>([]);
   const [kategori, setKategori] = useState<Kategori[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -91,7 +95,17 @@ const AdminPengumumanPage: React.FC = () => {
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [filterKategoriId, setFilterKategoriId] = useState<string | null>(null);
 
-  const form = useForm<z.infer<typeof pengumumanSchema>>({
+  const addForm = useForm<z.infer<typeof pengumumanSchema>>({
+    resolver: zodResolver(pengumumanSchema),
+    defaultValues: {
+      judul: "",
+      isi: "",
+      tanggal: "",
+      kategoriId: "",
+    },
+  });
+
+  const editForm = useForm<z.infer<typeof pengumumanSchema>>({
     resolver: zodResolver(pengumumanSchema),
     defaultValues: {
       judul: "",
@@ -106,7 +120,7 @@ const AdminPengumumanPage: React.FC = () => {
       fetchPengumuman();
       fetchKategori();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, user]);
 
   const fetchPengumuman = async () => {
@@ -114,10 +128,10 @@ const AdminPengumumanPage: React.FC = () => {
     try {
       const data = await getAllPengumuman();
       setPengumuman(data);
-    } catch {
+    } catch (error) {
       toast({
         title: "Error",
-        description: "Gagal memuat data pengumuman. Silakan coba lagi nanti.",
+        description: "Gagal memuat data pengumuman",
         variant: "destructive",
       });
     } finally {
@@ -129,16 +143,16 @@ const AdminPengumumanPage: React.FC = () => {
     try {
       const data = await getAllKategori();
       setKategori(data);
-    } catch {
+    } catch (error) {
       toast({
         title: "Error",
-        description: "Gagal memuat data kategori. Silakan coba lagi nanti.",
+        description: "Gagal memuat data kategori",
         variant: "destructive",
       });
     }
   };
 
-  const onSubmit = async (data: z.infer<typeof pengumumanSchema>) => {
+  const handleAdd = async (data: z.infer<typeof pengumumanSchema>) => {
     try {
       const formattedData = {
         ...data,
@@ -150,13 +164,34 @@ const AdminPengumumanPage: React.FC = () => {
         description: "Pengumuman berhasil ditambahkan",
       });
       fetchPengumuman();
-      setIsDialogOpen(false);
-      form.reset();
+      setIsAddDialogOpen(false);
+      addForm.reset();
     } catch (error) {
-      console.error("Error creating pengumuman:", error);
       toast({
         title: "Error",
-        description: "Gagal menyimpan pengumuman. Silakan coba lagi nanti.",
+        description: "Gagal menambah pengumuman",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEdit = async (data: z.infer<typeof pengumumanSchema>) => {
+    if (!selectedId) return;
+    try {
+      const formattedData = {
+        ...data,
+        tanggal: new Date(data.tanggal).toISOString(),
+      };
+      await updatePengumuman(selectedId, formattedData);
+      toast({ title: "Sukses", description: "Pengumuman berhasil diperbarui" });
+      fetchPengumuman();
+      setIsEditDialogOpen(false);
+      editForm.reset();
+      setSelectedId(null);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Gagal memperbarui pengumuman",
         variant: "destructive",
       });
     }
@@ -167,10 +202,30 @@ const AdminPengumumanPage: React.FC = () => {
       await deletePengumuman(id);
       toast({ title: "Sukses", description: "Pengumuman berhasil dihapus" });
       fetchPengumuman();
-    } catch {
+    } catch (error) {
       toast({
         title: "Error",
-        description: "Gagal menghapus pengumuman. Silakan coba lagi nanti.",
+        description: "Gagal menghapus pengumuman",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditClick = async (id: string) => {
+    try {
+      const data = await getPengumumanById(id);
+      editForm.reset({
+        judul: data.judul,
+        isi: data.isi,
+        tanggal: new Date(data.tanggal).toISOString().split("T")[0],
+        kategoriId: data.kategoriId,
+      });
+      setSelectedId(id);
+      setIsEditDialogOpen(true);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Gagal memuat data pengumuman",
         variant: "destructive",
       });
     }
@@ -204,13 +259,85 @@ const AdminPengumumanPage: React.FC = () => {
       });
   }, [pengumuman, searchTerm, filterKategoriId, sortField, sortDirection]);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
+  if (loading) return <div>Loading...</div>;
   if (!user || user.role !== "ADMIN") {
     return <div>Anda tidak memiliki akses ke halaman ini.</div>;
   }
+
+  const PengumumanForm: React.FC<{
+    form: typeof addForm;
+    onSubmit: (data: z.infer<typeof pengumumanSchema>) => Promise<void>;
+    submitText: string;
+  }> = ({ form, onSubmit, submitText }) => (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="judul"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Judul</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="isi"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Isi Pengumuman</FormLabel>
+              <FormControl>
+                <Textarea {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="tanggal"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Tanggal</FormLabel>
+              <FormControl>
+                <Input type="date" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="kategoriId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Kategori</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih kategori" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {kategori.map((item) => (
+                    <SelectItem key={item.id} value={item.id}>
+                      {item.nama}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit">{submitText}</Button>
+      </form>
+    </Form>
+  );
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -222,9 +349,9 @@ const AdminPengumumanPage: React.FC = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-2xl">Manajemen Pengumuman</CardTitle>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
-                <Button onClick={() => form.reset()}>
+                <Button onClick={() => addForm.reset()}>
                   <Plus className="mr-2 h-4 w-4" /> Tambah Pengumuman
                 </Button>
               </DialogTrigger>
@@ -232,80 +359,11 @@ const AdminPengumumanPage: React.FC = () => {
                 <DialogHeader>
                   <DialogTitle>Tambah Pengumuman</DialogTitle>
                 </DialogHeader>
-                <Form {...form}>
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-4"
-                  >
-                    <FormField
-                      control={form.control}
-                      name="judul"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Judul</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="isi"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Isi Pengumuman</FormLabel>
-                          <FormControl>
-                            <Textarea {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="tanggal"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Tanggal</FormLabel>
-                          <FormControl>
-                            <Input type="date" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="kategoriId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Kategori</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Pilih kategori" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {kategori.map((item) => (
-                                <SelectItem key={item.id} value={item.id}>
-                                  {item.nama}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button type="submit">Tambah Pengumuman</Button>
-                  </form>
-                </Form>
+                <PengumumanForm
+                  form={addForm}
+                  onSubmit={handleAdd}
+                  submitText="Tambah"
+                />
               </DialogContent>
             </Dialog>
           </CardHeader>
@@ -339,6 +397,7 @@ const AdminPengumumanPage: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
+
             {isLoading ? (
               <div className="flex justify-center items-center h-32">
                 <Loader2 className="h-8 w-8 animate-spin" />
@@ -389,11 +448,13 @@ const AdminPengumumanPage: React.FC = () => {
                         {new Date(item.tanggal).toLocaleDateString("id-ID")}
                       </TableCell>
                       <TableCell>
-                        <Link href={`/announcement/${item.id}`}>
-                          <Button variant="ghost" size="sm">
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                        </Link>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditClick(item.id)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button variant="ghost" size="sm">
@@ -428,6 +489,20 @@ const AdminPengumumanPage: React.FC = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Edit Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Pengumuman</DialogTitle>
+            </DialogHeader>
+            <PengumumanForm
+              form={editForm}
+              onSubmit={handleEdit}
+              submitText="Simpan"
+            />
+          </DialogContent>
+        </Dialog>
       </motion.div>
     </div>
   );
