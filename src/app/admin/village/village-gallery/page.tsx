@@ -2,7 +2,7 @@
 // src/app/admin/village/village-gallery/page.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
@@ -253,9 +253,6 @@ const AdminVillageGalleryPage: React.FC = () => {
                             className="rounded-lg object-cover transition-transform group-hover:scale-105"
                           />
                         </div>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {image.description || "Tidak ada deskripsi"}
-                        </p>
                         <Button
                           variant="destructive"
                           size="sm"
