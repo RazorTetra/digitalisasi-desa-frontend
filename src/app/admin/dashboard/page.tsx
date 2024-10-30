@@ -242,7 +242,7 @@ export default function AdminDashboard() {
                 <div>
                   <CardTitle>Pengumuman</CardTitle>
                   <CardDescription>
-                    {stats?.pengumuman.active} pengumuman aktif dari total {stats?.pengumuman.total}
+                    Jumlah Pengumuman {stats?.pengumuman.total}
                   </CardDescription>
                 </div>
                 <Bell className="h-5 w-5 text-muted-foreground" />
