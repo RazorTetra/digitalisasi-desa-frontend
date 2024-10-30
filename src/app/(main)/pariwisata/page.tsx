@@ -14,17 +14,18 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, ArrowRight, Loader2 } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { MapPin, ArrowRight, Loader2, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { getHeroBanner, type HeroBanner } from "@/api/heroBannerApi";
 import { Tourism, getAllTourism } from "@/api/tourismApi";
 import { useToast } from "@/hooks/use-toast";
 
 const PariwisataPage: React.FC = () => {
-  const [selectedDestination, setSelectedDestination] =
-    useState<Tourism | null>(null);
+  const [selectedDestination, setSelectedDestination] = useState<Tourism | null>(null);
   const [heroBanner, setHeroBanner] = useState<HeroBanner | null>(null);
   const [destinations, setDestinations] = useState<Tourism[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<{ url: string; index: number } | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -50,6 +51,20 @@ const PariwisataPage: React.FC = () => {
 
     fetchData();
   }, [toast]);
+
+  const handleImageNavigation = (direction: "prev" | "next") => {
+    if (!selectedDestination || !selectedImage) return;
+    
+    const currentIndex = selectedImage.index;
+    const newIndex = direction === "prev" 
+      ? Math.max(0, currentIndex - 1)
+      : Math.min(selectedDestination.gallery.length - 1, currentIndex + 1);
+    
+    setSelectedImage({
+      url: selectedDestination.gallery[newIndex],
+      index: newIndex
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -126,12 +141,8 @@ const PariwisataPage: React.FC = () => {
                         />
                       </div>
                       <CardHeader>
-                        <CardTitle className="text-xl">
-                          {destination.name}
-                        </CardTitle>
-                        <CardDescription>
-                          {destination.description}
-                        </CardDescription>
+                        <CardTitle className="text-xl">{destination.name}</CardTitle>
+                        <CardDescription>{destination.description}</CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-2 mb-4">
@@ -159,7 +170,7 @@ const PariwisataPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Detail Modal */}
+      {/* Destination Modal */}
       <AnimatePresence>
         {selectedDestination && (
           <motion.div
@@ -175,39 +186,33 @@ const PariwisataPage: React.FC = () => {
               className="fixed inset-0 z-50 flex items-center justify-center p-4"
             >
               <Card className="w-full max-w-4xl max-h-[90vh] overflow-hidden">
-                <ScrollArea className="h-full">
-                  <CardHeader>
-                    <div className="relative h-64 -mt-6 -mx-6 mb-4">
-                      <Image
-                        src={selectedDestination.image}
-                        alt={selectedDestination.name}
-                        fill
-                        className="object-cover"
-                      />
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="absolute top-4 right-4 bg-background/50 backdrop-blur-sm"
-                        onClick={() => setSelectedDestination(null)}
-                      >
-                        ✕
-                      </Button>
-                    </div>
-                    <div>
-                      <CardTitle className="text-2xl">
-                        {selectedDestination.name}
-                      </CardTitle>
-                      <CardDescription>
-                        {selectedDestination.description}
-                      </CardDescription>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <Tabs defaultValue="info">
-                      <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="info">Informasi</TabsTrigger>
-                        <TabsTrigger value="gallery">Galeri</TabsTrigger>
-                      </TabsList>
+                <CardHeader className="relative">
+                  <div className="relative h-64 -mt-6 -mx-6 mb-4">
+                    <Image
+                      src={selectedDestination.image}
+                      alt={selectedDestination.name}
+                      fill
+                      className="object-cover"
+                    />
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="absolute top-4 right-4 bg-background/50 backdrop-blur-sm"
+                      onClick={() => setSelectedDestination(null)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <CardTitle className="text-2xl">{selectedDestination.name}</CardTitle>
+                  <CardDescription>{selectedDestination.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Tabs defaultValue="info">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="info">Informasi</TabsTrigger>
+                      <TabsTrigger value="gallery">Galeri</TabsTrigger>
+                    </TabsList>
+                    <ScrollArea className="h-[400px] mt-4">
                       <TabsContent value="info" className="space-y-4">
                         <div className="grid grid-cols-2 gap-4 my-4">
                           <div className="flex items-center">
@@ -224,7 +229,8 @@ const PariwisataPage: React.FC = () => {
                           {selectedDestination.gallery.map((image, index) => (
                             <div
                               key={index}
-                              className="relative aspect-square overflow-hidden rounded-lg"
+                              className="relative aspect-square overflow-hidden rounded-lg cursor-pointer"
+                              onClick={() => setSelectedImage({ url: image, index })}
                             >
                               <Image
                                 src={image}
@@ -236,14 +242,63 @@ const PariwisataPage: React.FC = () => {
                           ))}
                         </div>
                       </TabsContent>
-                    </Tabs>
-                  </CardContent>
-                </ScrollArea>
+                    </ScrollArea>
+                  </Tabs>
+                </CardContent>
               </Card>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Image Modal */}
+      <Dialog open={selectedImage !== null} onOpenChange={() => setSelectedImage(null)}>
+        <DialogContent className="max-w-[90vw] h-[90vh] p-0">
+          {selectedImage && (
+            <div className="relative w-full h-full">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 z-50"
+                onClick={() => setSelectedImage(null)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+              <div className="relative w-full h-full">
+                <Image
+                  src={selectedImage.url}
+                  alt="Gallery image"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+              {selectedImage.index > 0 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute left-2 top-1/2 -translate-y-1/2"
+                  onClick={() => handleImageNavigation("prev")}
+                >
+                  <ChevronLeft className="h-8 w-8" />
+                </Button>
+              )}
+              {selectedDestination && selectedImage.index < selectedDestination.gallery.length - 1 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-2 top-1/2 -translate-y-1/2"
+                  onClick={() => handleImageNavigation("next")}
+                >
+                  <ChevronRight className="h-8 w-8" />
+                </Button>
+              )}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 px-4 py-2 rounded-full text-white">
+                {selectedImage.index + 1} / {selectedDestination?.gallery.length}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
