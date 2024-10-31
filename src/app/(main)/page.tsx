@@ -80,7 +80,6 @@ const services: ServiceItem[] = [
   },
 ];
 
-
 // Animations
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -167,6 +166,7 @@ export default function Home(): JSX.Element {
                 alt="Desa Tandengan"
                 fill
                 priority
+                sizes="100vw"
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background/90" />
@@ -336,6 +336,7 @@ export default function Home(): JSX.Element {
                             fill
                             className="object-cover"
                             priority
+                            sizes="(max-width: 768px) 100vw, 66vw"
                           />
                           {/* Gradient overlay */}
                           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
@@ -380,6 +381,7 @@ export default function Home(): JSX.Element {
                             alt={item.judul}
                             fill
                             className="object-cover rounded-l"
+                            sizes="(max-width: 768px) 33vw, 20vw"
                           />
                         </div>
                         <div className="col-span-2 p-4">
