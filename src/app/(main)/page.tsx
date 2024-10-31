@@ -30,7 +30,7 @@ import { Berita, getAllBerita } from "@/api/beritaApi";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import Image from "next/image";
-import { getHeroBanner, type HeroBanner } from "@/api/heroBannerApi";
+import { useHeroBanner } from "@/hooks/use-hero-banner";
 
 // Types
 interface ServiceItem {
@@ -105,7 +105,7 @@ export default function Home(): JSX.Element {
   const [berita, setBerita] = useState<Berita[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [heroBanner, setHeroBanner] = useState<HeroBanner | null>(null);
+  const { data: heroBanner } = useHeroBanner();
   const slides = ["Selamat Datang di", "Desa Tandengan", "Digital"];
 
   useEffect(() => {
@@ -119,10 +119,9 @@ export default function Home(): JSX.Element {
     const fetchData = async () => {
       try {
         // Fetch both pengumuman and berita concurrently
-        const [pengumumanData, beritaData, bannerData] = await Promise.all([
+        const [pengumumanData, beritaData] = await Promise.all([
           getAllPengumuman(),
           getAllBerita(),
-          getHeroBanner(),
         ]);
 
         // Sort and slice pengumuman
@@ -142,7 +141,6 @@ export default function Home(): JSX.Element {
           )
           .slice(0, 3);
         setBerita(sortedBerita);
-        setHeroBanner(bannerData);
       } catch (err) {
         setError("Gagal memuat data");
         console.error(err);
@@ -426,6 +424,42 @@ export default function Home(): JSX.Element {
               </Button>
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Maps Section */}
+      <section className="py-16 px-0 sm:px-0">
+        {" "}
+        {/* Menghapus padding di sisi kanan & kiri */}
+        <div className="max-w-[100vw]">
+          {" "}
+          {/* Container full width */}
+          <motion.h2
+            className="text-3xl font-bold text-center mb-12"
+            initial={{ opacity: 0, y: -20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            Lokasi Desa
+          </motion.h2>
+          <motion.div
+            className="w-full shadow-lg"
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+          >
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d25573.01154935206!2d124.92897481630786!3d1.222489811220911!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x32873e7a180f6f19%3A0x92557bcdc1027cb0!2sTandengan%2C%20Kec.%20Eris%2C%20Kabupaten%20Minahasa%2C%20Sulawesi%20Utara!5e0!3m2!1sid!2sid!4v1730348024880!5m2!1sid!2sid"
+              width="100%"
+              height="450"
+              style={{ border: 0 }}
+              allowFullScreen={true}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </motion.div>
         </div>
       </section>
     </div>

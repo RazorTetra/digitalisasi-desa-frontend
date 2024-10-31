@@ -72,6 +72,19 @@ const StatsCard = ({
   </Card>
 );
 
+const DestinationImage = ({ src, alt }: { src: string; alt: string }) => (
+  <div className="relative aspect-square w-16 h-16">
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      sizes="(max-width: 768px) 64px, 64px"
+      className="object-cover rounded"
+      priority={false}
+    />
+  </div>
+);
+
 export default function AdminDashboard() {
   const { user } = useAuth(true);
   const { stats, isLoading, fetchStats } = useDashboard();
@@ -208,14 +221,10 @@ export default function AdminDashboard() {
               <div className="space-y-4">
                 {stats?.tourism.recentDestinations.map((destination) => (
                   <div key={destination.id} className="flex items-center space-x-4">
-                    <div className="relative w-16 h-16">
-                      <Image
-                        src={destination.image}
-                        alt={destination.name}
-                        fill
-                        className="object-cover rounded"
-                      />
-                    </div>
+                    <DestinationImage
+                      src={destination.image}
+                      alt={destination.name}
+                    />
                     <div>
                       <h4 className="font-semibold">{destination.name}</h4>
                       <p className="text-sm text-muted-foreground">

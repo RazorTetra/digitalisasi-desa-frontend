@@ -31,6 +31,51 @@ interface TourismListProps {
   onDelete: (id: string) => Promise<boolean | void>;
 }
 
+// Separate Image component for better reusability and optimization
+const DestinationImage = ({ src, alt }: { src: string; alt: string }) => (
+  <div className="relative aspect-square w-20 h-20">
+    <Image
+      src={src}
+      alt={alt}
+      fill
+      sizes="(max-width: 768px) 80px, 80px"
+      className="object-cover rounded"
+      priority={false}
+      loading="lazy"
+      quality={75}
+    />
+  </div>
+);
+
+// Action buttons component for better organization
+const ActionButtons = ({ 
+  onEdit,
+  onDelete 
+}: { 
+  onEdit: () => void;
+  onDelete: () => void;
+}) => (
+  <div className="flex justify-end gap-2">
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={onEdit}
+      aria-label="Edit destinasi"
+    >
+      <Pencil className="h-4 w-4" />
+    </Button>
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={onDelete}
+      className="text-red-500 hover:text-red-700"
+      aria-label="Hapus destinasi"
+    >
+      <Trash2 className="h-4 w-4" />
+    </Button>
+  </div>
+);
+
 export function TourismList({ items, onDelete }: TourismListProps) {
   const [deleteId, setDeleteId] = React.useState<string | null>(null);
   const router = useRouter();
@@ -42,64 +87,59 @@ export function TourismList({ items, onDelete }: TourismListProps) {
     }
   };
 
+  const handleEdit = (id: string) => {
+    router.push(`/admin/pariwisata/${id}`);
+  };
+
   return (
     <>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Gambar</TableHead>
-            <TableHead>Nama Destinasi</TableHead>
-            <TableHead>Lokasi</TableHead>
-            <TableHead>Terakhir Diperbarui</TableHead>
-            <TableHead className="text-right">Aksi</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {items.map((item) => (
-            <TableRow key={item.id}>
-              <TableCell>
-                <div className="relative w-20 h-20">
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    fill
-                    className="object-cover rounded"
-                  />
-                </div>
-              </TableCell>
-              <TableCell className="font-medium">{item.name}</TableCell>
-              <TableCell>{item.location}</TableCell>
-              <TableCell>
-                {format(new Date(item.updatedAt), "dd MMMM yyyy", { locale: id })}
-              </TableCell>
-              <TableCell className="text-right">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => router.push(`/admin/pariwisata/${item.id}`)}
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setDeleteId(item.id)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-          {items.length === 0 && (
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan={5} className="text-center py-8">
-                Belum ada destinasi wisata yang ditambahkan
-              </TableCell>
+              <TableHead className="w-24">Gambar</TableHead>
+              <TableHead>Nama Destinasi</TableHead>
+              <TableHead>Lokasi</TableHead>
+              <TableHead>Terakhir Diperbarui</TableHead>
+              <TableHead className="w-24 text-right">Aksi</TableHead>
             </TableRow>
-          )}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {items.length === 0 ? (
+              <TableRow>
+                <TableCell 
+                  colSpan={5} 
+                  className="text-center py-8 text-muted-foreground"
+                >
+                  Belum ada destinasi wisata yang ditambahkan
+                </TableCell>
+              </TableRow>
+            ) : (
+              items.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell>
+                    <DestinationImage 
+                      src={item.image} 
+                      alt={item.name} 
+                    />
+                  </TableCell>
+                  <TableCell className="font-medium">{item.name}</TableCell>
+                  <TableCell>{item.location}</TableCell>
+                  <TableCell>
+                    {format(new Date(item.updatedAt), "dd MMMM yyyy", { locale: id })}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <ActionButtons
+                      onEdit={() => handleEdit(item.id)}
+                      onDelete={() => setDeleteId(item.id)}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>

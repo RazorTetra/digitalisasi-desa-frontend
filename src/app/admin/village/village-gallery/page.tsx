@@ -179,6 +179,7 @@ const AdminVillageGalleryPage: React.FC = () => {
                   src={preview}
                   alt="Preview"
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 33vw"
                   className="object-contain rounded-lg"
                 />
                 <Button
@@ -234,7 +235,7 @@ const AdminVillageGalleryPage: React.FC = () => {
               layout
             >
               <AnimatePresence>
-                {gallery.map((image) => (
+                {gallery.map((image, index) => (
                   <motion.div
                     key={image.id}
                     layout
@@ -250,6 +251,8 @@ const AdminVillageGalleryPage: React.FC = () => {
                             src={image.imageUrl}
                             alt={image.description || "Gambar desa"}
                             fill
+                            priority={index < 2} // Add priority to first 2 images
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 33vw"
                             className="rounded-lg object-cover transition-transform group-hover:scale-105"
                           />
                         </div>
