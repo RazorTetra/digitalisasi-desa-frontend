@@ -70,3 +70,4 @@ export const updateStatus = async (id: string, data: UpdateTamuStatusData): Prom
 export const deleteLaporan = async (id: string): Promise<void> => {
   await apiClient.delete(`/tamu-wajib-lapor/${id}`);
 };
+

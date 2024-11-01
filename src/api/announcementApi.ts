@@ -76,3 +76,4 @@ export const updatePengumuman = async (id: string, data: UpdatePengumumanData): 
 export const deletePengumuman = async (id: string): Promise<void> => {
   await apiClient.delete(`/pengumuman/${id}`);
 };
+

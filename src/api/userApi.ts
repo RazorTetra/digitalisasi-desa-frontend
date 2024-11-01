@@ -39,3 +39,4 @@ export const deleteUser = (id: string) =>
 
 export const getCurrentUser = (): Promise<UserData> => 
   apiClient.get<UserData>('/auth/me').then(response => response.data);
+

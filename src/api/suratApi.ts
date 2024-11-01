@@ -25,3 +25,5 @@ export const uploadFormatSurat = (formData: FormData): Promise<FormatSurat> =>
 // Hapus format surat
 export const deleteFormatSurat = (id: string): Promise<void> =>
   apiClient.delete(`/surat/format/${id}`);
+
+

@@ -391,7 +391,7 @@ export default function PeriodDetailPage({
           </Button>
         ))}
       </div>
-
+{/* Formt  */}
       <div>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Daftar {getTabTitle()}</h2>

@@ -52,3 +52,4 @@ export const updateHeroBanner = (image: File): Promise<HeroBanner> => {
     })
     .then((response) => response.data);
 };
+
