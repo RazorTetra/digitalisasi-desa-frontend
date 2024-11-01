@@ -332,6 +332,8 @@ const TamuWajibLaporPage: React.FC = () => {
     </Card>
   );
 
+  // Static Code
+  // text dan tulisan di form atau di halaman diubah dibagian ini
   return (
     <div className="container mx-auto px-4 py-8">
       <motion.div
