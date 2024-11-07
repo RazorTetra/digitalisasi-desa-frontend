@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Select,
   SelectContent,
@@ -21,11 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Dialog,
   DialogContent,
@@ -52,7 +46,6 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
-  CalendarIcon,
 } from "lucide-react";
 
 const ITEMS_PER_PAGE = 10;
@@ -144,7 +137,7 @@ export function TWLManagementTable({
               <SelectItem value="REJECTED">Ditolak</SelectItem>
             </SelectContent>
           </Select>
-          <Popover>
+          {/* <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" className="w-[200px]">
                 <CalendarIcon className="mr-2 h-4 w-4" />
@@ -162,7 +155,7 @@ export function TWLManagementTable({
                 initialFocus
               />
             </PopoverContent>
-          </Popover>
+          </Popover> */}
           {date && (
             <Button
               variant="ghost"
