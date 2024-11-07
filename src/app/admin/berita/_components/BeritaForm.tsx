@@ -283,7 +283,7 @@ export function BeritaForm({
           )}
         />
 
-        <FormField
+        {/* <FormField
           control={form.control}
           name="isHighlight"
           render={({ field }) => (
@@ -300,7 +300,7 @@ export function BeritaForm({
               <FormMessage />
             </FormItem>
           )}
-        />
+        /> */}
 
         {/* Modified image upload section */}
         <FormLabel>Gambar Berita</FormLabel>

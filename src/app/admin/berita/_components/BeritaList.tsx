@@ -35,13 +35,10 @@ import {
   MoreVertical, 
   Edit2, 
   Trash2,
-  Eye,
-  Star,
-  StarOff
-} from "lucide-react";
+  Eye} from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
-import { Berita, deleteBerita, updateBerita } from "@/api/beritaApi";
+import { Berita, deleteBerita } from "@/api/beritaApi";
 
 interface BeritaListProps {
   data: Berita[];
@@ -83,22 +80,6 @@ export function BeritaList({ data, onRefresh }: BeritaListProps) {
     }
   };
 
-  const toggleHighlight = async (id: string, currentState: boolean) => {
-    try {
-      await updateBerita(id, { isHighlight: !currentState });
-      await onRefresh();
-      toast({
-        title: "Berhasil",
-        description: `Berita telah ${!currentState ? "ditambahkan ke" : "dihapus dari"} highlight`,
-      });
-    } catch  {
-      toast({
-        title: "Error",
-        description: "Gagal mengubah status highlight. Silakan coba lagi.",
-        variant: "destructive",
-      });
-    }
-  };
 
   return (
     <div className="space-y-4">
@@ -120,7 +101,7 @@ export function BeritaList({ data, onRefresh }: BeritaListProps) {
               <TableHead>Penulis</TableHead>
               <TableHead>Kategori</TableHead>
               <TableHead>Tanggal</TableHead>
-              <TableHead>Status</TableHead>
+              {/* <TableHead>Status</TableHead> */}
               <TableHead className="text-right">Aksi</TableHead>
             </TableRow>
           </TableHeader>
@@ -141,13 +122,13 @@ export function BeritaList({ data, onRefresh }: BeritaListProps) {
                 <TableCell>
                   {format(new Date(berita.tanggal), "dd MMMM yyyy", { locale: id })}
                 </TableCell>
-                <TableCell>
+                {/* <TableCell>
                   {berita.isHighlight ? (
                     <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">
                       Highlight
                     </Badge>
                   ) : null}
-                </TableCell>
+                </TableCell> */}
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -169,7 +150,7 @@ export function BeritaList({ data, onRefresh }: BeritaListProps) {
                           Edit
                         </DropdownMenuItem>
                       </Link>
-                      <DropdownMenuItem
+                      {/* <DropdownMenuItem
                         onClick={() => toggleHighlight(berita.id, berita.isHighlight)}
                       >
                         {berita.isHighlight ? (
@@ -183,7 +164,7 @@ export function BeritaList({ data, onRefresh }: BeritaListProps) {
                             Tambah ke Highlight
                           </>
                         )}
-                      </DropdownMenuItem>
+                      </DropdownMenuItem> */}
                       <DropdownMenuItem
                         onClick={() => setDeleteId(berita.id)}
                         className="text-red-600"
