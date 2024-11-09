@@ -102,7 +102,7 @@ const itemVariants: Variants = {
 export default function Home(): JSX.Element {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [pengumuman, setPengumuman] = useState<APIPengumuman[]>([]);
-  const [berita, setBerita] = useState<Berita[]>([]);
+  const [, setBerita] = useState<Berita[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { data: heroBanner } = useHeroBanner();
@@ -309,123 +309,7 @@ export default function Home(): JSX.Element {
       </section>
 
       {/* News Section */}
-      <section className="py-16 bg-secondary">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">
-            Berita Terkini
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Main News */}
-            {berita.length > 0 && (
-              <motion.div
-                className="md:col-span-2"
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <Link href={`/berita/${berita[0].slug}`}>
-                  <Card className="h-full overflow-hidden">
-                    <div className="relative h-64">
-                      {berita[0].gambarUrl && (
-                        <>
-                          <Image
-                            src={berita[0].gambarUrl}
-                            alt={berita[0].judul}
-                            fill
-                            className="object-cover"
-                            priority
-                            sizes="(max-width: 768px) 100vw, 66vw"
-                          />
-                          {/* Gradient overlay */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
-                          <div className="absolute inset-0 p-6 flex flex-col justify-end text-white">
-                            <h3 className="text-2xl font-semibold mb-2 hover:text-primary/90 transition-colors">
-                              {berita[0].judul}
-                            </h3>
-                            <p className="text-white/80 mb-2 line-clamp-2">
-                              {berita[0].ringkasan}
-                            </p>
-                            <p className="text-sm text-white/60">
-                              {format(
-                                new Date(berita[0].tanggal),
-                                "dd MMMM yyyy",
-                                { locale: id }
-                              )}
-                            </p>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </Card>
-                </Link>
-              </motion.div>
-            )}
 
-            {/* Berita lainnya */}
-            <div className="space-y-6">
-              {berita.slice(1).map((item, index) => (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, x: 50 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                >
-                  <Link href={`/berita/${item.slug}`}>
-                    <Card className="overflow-hidden">
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="relative h-24">
-                          <Image
-                            src={item.gambarUrl}
-                            alt={item.judul}
-                            fill
-                            className="object-cover rounded-l"
-                            sizes="(max-width: 768px) 33vw, 20vw"
-                          />
-                        </div>
-                        <div className="col-span-2 p-4">
-                          <h4 className="font-semibold mb-2 line-clamp-2 hover:text-primary transition-colors">
-                            {item.judul}
-                          </h4>
-                          <p className="text-xs text-muted-foreground">
-                            {format(new Date(item.tanggal), "dd MMMM yyyy", {
-                              locale: id,
-                            })}
-                          </p>
-                        </div>
-                      </div>
-                    </Card>
-                  </Link>
-                </motion.div>
-              ))}
-              {loading && (
-                <div className="space-y-6">
-                  {[...Array(2)].map((_, i) => (
-                    <div key={i} className="animate-pulse">
-                      <Card>
-                        <div className="grid grid-cols-3 gap-4 p-4">
-                          <div className="bg-muted h-24 rounded" />
-                          <div className="col-span-2 space-y-2">
-                            <div className="h-4 bg-muted rounded w-3/4" />
-                            <div className="h-3 bg-muted rounded w-1/4" />
-                          </div>
-                        </div>
-                      </Card>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="text-center mt-8">
-            <Link href="/berita">
-              <Button size="lg">
-                Lihat Semua Berita
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
 
       {/* Maps Section */}
       <section className="py-16 px-0 sm:px-0">

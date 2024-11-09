@@ -27,7 +27,6 @@ import {
   ImageUp,
   GalleryThumbnails,
   Banknote,
-  Newspaper,
   Sunset,
   MailQuestion,
   Speech,
@@ -147,22 +146,22 @@ const navItems: NavItem[] = [
       },
     ],
   },
-  {
-    title: "Berita",
-    icon: <Newspaper className="h-5 w-5" aria-hidden="true" />,
-    subItems: [
-      {
-        title: "berita",
-        href: "/admin/berita",
-        icon: <Newspaper className="h-5 w-5" />,
-      },
-      {
-        title: "Kategori Berita",
-        href: "/admin/berita-kategori",
-        icon: <FileText className="h-4 w-4" aria-hidden="true" />,
-      },
-    ],
-  },
+  // {
+  //   title: "Berita",
+  //   icon: <Newspaper className="h-5 w-5" aria-hidden="true" />,
+  //   subItems: [
+  //     {
+  //       title: "berita",
+  //       href: "/admin/berita",
+  //       icon: <Newspaper className="h-5 w-5" />,
+  //     },
+  //     {
+  //       title: "Kategori Berita",
+  //       href: "/admin/berita-kategori",
+  //       icon: <FileText className="h-4 w-4" aria-hidden="true" />,
+  //     },
+  //   ],
+  // },
 
   {
     title: "Pengguna",
