@@ -116,8 +116,13 @@ const navItems: NavItem[] = [
     ],
   },
   {
-    title: "Manajemen Surat",
+    title: "Format Surat",
     href: "/admin/surat",
+    icon: <MailQuestion className="h-5 w-5" />,
+  },
+  {
+    title: "Surat dari Warga",
+    href: "/admin/submissions",
     icon: <MailQuestion className="h-5 w-5" />,
   },
   {

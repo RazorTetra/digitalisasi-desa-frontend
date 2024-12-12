@@ -55,9 +55,15 @@ const services: ServiceItem[] = [
     icon: UserCheck,
   },
   {
-    title: "Surat Menyurat",
-    desc: "Layanan administrasi surat",
+    title: "Format Surat",
+    desc: "Unduh format surat yang diperlukan",
     link: "/surat",
+    icon: FileText,
+  },
+  {
+    title: "Layaran Surat",
+    desc: "Layanan administrasi surat",
+    link: "/kirim-surat",
     icon: FileText,
   },
   {
