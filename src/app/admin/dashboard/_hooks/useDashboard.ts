@@ -1,18 +1,15 @@
 // src/app/admin/dashboard/_hooks/useDashboard.ts
-import { useState, useCallback } from 'react';
+import { useState, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  getAllTourism,
-  Tourism 
-} from '@/api/tourismApi';
-import { 
-  getAllLaporan,
-  TamuWajibLapor, 
-} from '@/api/tamuWajibLaporApi';
-import { 
-  getAllPengumuman,
-  Pengumuman 
-} from '@/api/announcementApi';
+import { getAllTourism, Tourism } from "@/api/tourismApi";
+import { getAllLaporan, TamuWajibLapor } from "@/api/tamuWajibLaporApi";
+import { getAllPengumuman, Pengumuman } from "@/api/announcementApi";
+import {
+  getAllFormatSurat,
+  getFormatSuratStats,
+  FormatSurat,
+  DownloadStats,
+} from "@/api/suratApi";
 
 export interface DashboardStats {
   // Statistik Tamu Wajib Lapor
@@ -34,75 +31,105 @@ export interface DashboardStats {
     active: number; // Pengumuman yang tanggalnya masih aktif
     recentAnnouncements: Pengumuman[]; // 3 pengumuman terbaru
   };
+
+  surat: {
+    totalFormats: number;
+    totalDownloads: number;
+    recentFormats: FormatSurat[]; // 3 format surat terbaru
+    downloadStats: DownloadStats[]; // Statistik download bulanan
+  };
 }
 
+// src/app/admin/dashboard/_hooks/useDashboard.ts
 export const useDashboard = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  // Helper untuk mendapatkan tanggal hari ini tanpa waktu
-  const getTodayDate = () => {
+  // Pindahkan helper functions ke dalam useCallback
+  const getTodayDate = useCallback(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return today;
-  };
+  }, []);
 
-  // Helper untuk menghitung status Tamu Wajib Lapor
-  const calculateTamuStats = (data: TamuWajibLapor[]) => {
-    // Sort by date descending untuk mendapatkan submission terbaru
-    const sortedData = [...data].sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  const calculateTamuStats = useCallback((data: TamuWajibLapor[]) => {
+    const sortedData = [...data].sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
 
     return {
       totalSubmissions: data.length,
-      pending: data.filter(item => item.status === 'PENDING').length,
-      approved: data.filter(item => item.status === 'APPROVED').length,
-      rejected: data.filter(item => item.status === 'REJECTED').length,
-      recentSubmissions: sortedData.slice(0, 5) // Ambil 5 terbaru
+      pending: data.filter((item) => item.status === "PENDING").length,
+      approved: data.filter((item) => item.status === "APPROVED").length,
+      rejected: data.filter((item) => item.status === "REJECTED").length,
+      recentSubmissions: sortedData.slice(0, 5),
     };
-  };
+  }, []);
 
-  // Helper untuk menghitung pengumuman aktif
-  const calculatePengumumanStats = (data: Pengumuman[]) => {
-    const today = getTodayDate();
-    const sortedData = [...data].sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+  const calculatePengumumanStats = useCallback(
+    (data: Pengumuman[]) => {
+      const today = getTodayDate();
+      const sortedData = [...data].sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
 
-    return {
-      total: data.length,
-      active: data.filter(item => new Date(item.tanggal) >= today).length,
-      recentAnnouncements: sortedData.slice(0, 3) // Ambil 3 terbaru
-    };
-  };
+      return {
+        total: data.length,
+        active: data.filter((item) => new Date(item.tanggal) >= today).length,
+        recentAnnouncements: sortedData.slice(0, 3),
+      };
+    },
+    [getTodayDate]
+  );
 
   const fetchStats = useCallback(async () => {
     try {
-      // Fetch semua data secara parallel
-      const [tourism, laporan, pengumuman] = await Promise.all([
+      const [tourism, laporan, pengumuman, formatSurat] = await Promise.all([
         getAllTourism(),
         getAllLaporan(),
-        getAllPengumuman()
+        getAllPengumuman(),
+        getAllFormatSurat(),
       ]);
 
-      // Sort tourism by date untuk mendapatkan yang terbaru
-      const sortedTourism = [...tourism].sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      const sortedFormatSurat = [...formatSurat].sort(
+        (a, b) => (b.totalDownloads || 0) - (a.totalDownloads || 0)
       );
 
-      // Compile stats
+      let downloadStats: DownloadStats[] = [];
+      if (sortedFormatSurat.length > 0) {
+        const mostDownloaded = sortedFormatSurat[0];
+        downloadStats = await getFormatSuratStats(mostDownloaded.id);
+      }
+
+      const totalDownloads = formatSurat.reduce(
+        (sum, format) => sum + (format.totalDownloads || 0),
+        0
+      );
+
+      const sortedTourism = [...tourism].sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+
       setStats({
         tamuWajibLapor: calculateTamuStats(laporan),
         tourism: {
           totalDestinations: tourism.length,
-          recentDestinations: sortedTourism.slice(0, 3) // Ambil 3 terbaru
+          recentDestinations: sortedTourism.slice(0, 3),
         },
-        pengumuman: calculatePengumumanStats(pengumuman)
+        pengumuman: calculatePengumumanStats(pengumuman),
+        surat: {
+          totalFormats: formatSurat.length,
+          totalDownloads,
+          recentFormats: sortedFormatSurat.slice(0, 3),
+          downloadStats,
+        },
       });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
+    } catch (err: unknown) {
+      console.error("Dashboard fetch error:", err);
       toast({
         title: "Error",
         description: "Gagal memuat data dashboard. Silakan coba lagi nanti.",
@@ -111,12 +138,11 @@ export const useDashboard = () => {
     } finally {
       setIsLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toast]);
+  }, [toast, calculateTamuStats, calculatePengumumanStats]);
 
   return {
     stats,
     isLoading,
-    fetchStats
+    fetchStats,
   };
 };

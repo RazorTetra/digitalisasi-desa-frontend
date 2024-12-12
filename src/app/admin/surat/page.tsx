@@ -57,8 +57,20 @@ import {
   getAllFormatSurat,
   uploadFormatSurat,
   deleteFormatSurat,
+  trackFormatSuratDownload,
+  getFormatSuratStats,
   FormatSurat,
+  DownloadStats,
 } from "@/api/suratApi";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_FILE_TYPES = [
@@ -109,6 +121,9 @@ const AdminSuratPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [selectedFormatId, setSelectedFormatId] = useState<string | null>(null);
+  const [downloadStats, setDownloadStats] = useState<DownloadStats[]>([]);
+  const [loadingStats, setLoadingStats] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<FormatSuratForm>({
@@ -123,10 +138,14 @@ const AdminSuratPage: React.FC = () => {
       const data = await getAllFormatSurat();
       setFormatSurat(data);
       setFilteredFormat(data);
-    } catch {
+    } catch (err) {
+      let errorMessage = "Tidak dapat memuat daftar format surat";
+      if (err instanceof Error) {
+        errorMessage += `: ${err.message}`;
+      }
       toast({
         title: "Gagal memuat data",
-        description: "Tidak dapat memuat daftar format surat",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -134,6 +153,51 @@ const AdminSuratPage: React.FC = () => {
     }
   }, [toast]);
 
+  // Mengembalikan useCallback untuk fetchDownloadStats
+  const fetchDownloadStats = useCallback(
+    async (id: string) => {
+      setLoadingStats(true);
+      try {
+        const stats = await getFormatSuratStats(id);
+
+        // Handle kasus ketika tidak ada data statistik
+        if (!stats || stats.length === 0) {
+          const currentDate = new Date();
+          const currentMonth = currentDate.toLocaleString("id-ID", {
+            month: "long",
+          });
+
+          // Dapatkan format surat yang dipilih untuk mendapatkan total downloads
+          const selectedFormat = formatSurat.find((f) => f.id === id);
+
+          setDownloadStats([
+            {
+              month: currentMonth,
+              year: currentDate.getFullYear(),
+              downloadCount: selectedFormat?.totalDownloads || 0,
+            },
+          ]);
+        } else {
+          setDownloadStats(stats);
+        }
+      } catch (err: unknown) {
+        let errorMessage = "Tidak dapat memuat statistik unduhan";
+        if (err instanceof Error) {
+          errorMessage += `: ${err.message}`;
+        }
+        toast({
+          title: "Gagal memuat statistik",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      } finally {
+        setLoadingStats(false);
+      }
+    },
+    [toast, formatSurat]
+  );
+
+  // Memperbaiki useEffect dengan dependency yang benar
   useEffect(() => {
     if (!user) return;
     fetchFormatSurat();
@@ -176,6 +240,10 @@ const AdminSuratPage: React.FC = () => {
     try {
       await deleteFormatSurat(id);
       await fetchFormatSurat();
+      if (selectedFormatId === id) {
+        setSelectedFormatId(null);
+        setDownloadStats([]);
+      }
       toast({
         title: "Berhasil",
         description: "Format surat telah dihapus",
@@ -191,13 +259,29 @@ const AdminSuratPage: React.FC = () => {
     }
   };
 
-  const handleFileChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files?.[0]) {
-        setSelectedFile(e.target.files[0]);
+  const handleDownload = useCallback(
+    async (format: FormatSurat) => {
+      try {
+        await trackFormatSuratDownload(format.id);
+        window.open(format.downloadUrl, "_blank");
+        // Refresh stats jika format ini sedang ditampilkan
+        if (selectedFormatId === format.id) {
+          await fetchDownloadStats(format.id);
+        }
+      } catch (err) {
+        console.error("Error tracking download:", err);
+        window.open(format.downloadUrl, "_blank");
       }
     },
-    []
+    [selectedFormatId, fetchDownloadStats]
+  );
+
+  const handleShowStats = useCallback(
+    async (id: string) => {
+      setSelectedFormatId(id);
+      await fetchDownloadStats(id);
+    },
+    [fetchDownloadStats]
   );
 
   if (!user) return null;
@@ -228,13 +312,70 @@ const AdminSuratPage: React.FC = () => {
           </Card>
         </div>
 
+        {/* Download Statistics */}
+        {selectedFormatId && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Statistik Unduhan</CardTitle>
+              <CardDescription>
+                {formatSurat.find((f) => f.id === selectedFormatId)?.nama}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loadingStats ? (
+                <div className="flex justify-center items-center h-64">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                </div>
+              ) : downloadStats.length > 0 ? (
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={downloadStats}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis
+                        allowDecimals={false} // Hanya tampilkan angka bulat
+                        domain={[0, "auto"]} // Mulai dari 0, maksimum otomatis
+                        tickCount={5} // Batasi jumlah tick untuk kejelasan
+                      />
+                      <Tooltip
+                        formatter={(value: number) => [
+                          Math.round(value),
+                          "Unduhan",
+                        ]} // Format angka bulat di tooltip
+                      />
+                      <Bar
+                        dataKey="downloadCount"
+                        fill="#3b82f6"
+                        name="Jumlah Unduhan"
+                        // Tambahkan label di atas bar jika ingin menampilkan angka
+                        label={{
+                          position: "top",
+                          formatter: (value: number) => Math.round(value),
+                        }}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
+                  <p>Belum ada data unduhan</p>
+                  <p className="text-sm">
+                    Statistik akan muncul setelah dokumen diunduh
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Main Content */}
         <Card>
           <CardHeader>
             <CardTitle>Manajemen Format Surat</CardTitle>
             <CardDescription>
               Kelola format surat yang tersedia untuk diunduh oleh warga.
-              Mendukung format .doc, .docx, dan .pdf dengan ukuran maksimal 5MB.
+              Mendukung format .doc dan .docx dengan ukuran maksimal 5MB. 
+               <span className="text-rose-400"> Hindari format PDF</span>.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-8">
@@ -276,7 +417,9 @@ const AdminSuratPage: React.FC = () => {
                                 accept=".doc,.docx,.pdf"
                                 onChange={(e) => {
                                   field.onChange(e.target.files);
-                                  handleFileChange(e);
+                                  if (e.target.files?.[0]) {
+                                    setSelectedFile(e.target.files[0]);
+                                  }
                                 }}
                                 ref={ref}
                                 className="file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
@@ -354,6 +497,7 @@ const AdminSuratPage: React.FC = () => {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Nama Format Surat</TableHead>
+                        <TableHead>Total Unduhan</TableHead>
                         <TableHead>Tanggal Dibuat</TableHead>
                         <TableHead>Terakhir Diperbarui</TableHead>
                         <TableHead>Aksi</TableHead>
@@ -365,6 +509,7 @@ const AdminSuratPage: React.FC = () => {
                           <TableCell className="font-medium">
                             {format.nama}
                           </TableCell>
+                          <TableCell>{format.totalDownloads ?? 0}</TableCell>
                           <TableCell>
                             {new Date(format.createdAt).toLocaleDateString(
                               "id-ID"
@@ -380,18 +525,19 @@ const AdminSuratPage: React.FC = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                asChild
-                                className="h-8 w-8 p-0"
+                                onClick={() => handleShowStats(format.id)}
+                                className="h-8 px-2"
                               >
-                                <a
-                                  href={format.downloadUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  download
-                                  title="Unduh format surat"
-                                >
-                                  <Download className="h-4 w-4" />
-                                </a>
+                                Statistik
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDownload(format)}
+                                className="h-8 w-8 p-0"
+                                title="Unduh format surat"
+                              >
+                                <Download className="h-4 w-4" />
                               </Button>
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>

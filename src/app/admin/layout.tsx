@@ -18,7 +18,7 @@ export default function AdminLayout({
         setIsCollapsed={setIsSidebarCollapsed} 
       />
       <main 
-        className={`flex-1 p-4 transition-all duration-300 ease-in-out ${
+        className={`flex-1 transition-all duration-300 ease-in-out ${
           isSidebarCollapsed ? 'md:ml-16' : 'md:ml-64'
         }`}
       >

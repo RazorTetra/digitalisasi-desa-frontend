@@ -1,14 +1,20 @@
 // src/app/admin/dashboard/page.tsx
 "use client";
 
-import { useEffect } from 'react';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import Image from 'next/image';
-import { format } from 'date-fns';
-import { id } from 'date-fns/locale';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { 
+import { useEffect } from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import Image from "next/image";
+import { format as formatDate } from "date-fns";
+import { id } from "date-fns/locale";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import {
   Table,
   TableBody,
   TableCell,
@@ -19,26 +25,36 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { 
+import {
   Mountain,
   UserCheck,
   XCircle,
   Bell,
   Loader2,
   Clock,
-  ArrowRight
-} from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { useDashboard } from './_hooks/useDashboard';
+  ArrowRight,
+} from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useDashboard } from "./_hooks/useDashboard";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { FileText, Download } from "lucide-react";
 
-const StatsCard = ({ 
-  title, 
-  value, 
+const StatsCard = ({
+  title,
+  value,
   description,
   icon: Icon,
   loading,
-  colorClass = "text-foreground"
-}: { 
+  colorClass = "text-foreground",
+}: {
   title: string;
   value: number;
   description?: string;
@@ -48,9 +64,7 @@ const StatsCard = ({
 }) => (
   <Card>
     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle className="text-sm font-medium">
-        {title}
-      </CardTitle>
+      <CardTitle className="text-sm font-medium">{title}</CardTitle>
       <Icon className="h-4 w-4 text-muted-foreground" />
     </CardHeader>
     <CardContent>
@@ -62,9 +76,7 @@ const StatsCard = ({
             {value.toLocaleString()}
           </div>
           {description && (
-            <p className="text-xs text-muted-foreground mt-1">
-              {description}
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">{description}</p>
           )}
         </>
       )}
@@ -90,19 +102,19 @@ export default function AdminDashboard() {
   const { stats, isLoading, fetchStats } = useDashboard();
 
   useEffect(() => {
-    if (user?.role === 'ADMIN') {
+    if (user?.role === "ADMIN") {
       fetchStats();
     }
   }, [user, fetchStats]);
 
-  if (!user || user.role !== 'ADMIN') {
+  if (!user || user.role !== "ADMIN") {
     return null;
   }
 
   const statusColors = {
-    PENDING: 'text-yellow-500',
-    APPROVED: 'text-green-500',
-    REJECTED: 'text-red-500'
+    PENDING: "text-yellow-500",
+    APPROVED: "text-green-500",
+    REJECTED: "text-red-500",
   };
 
   return (
@@ -124,7 +136,9 @@ export default function AdminDashboard() {
 
         {/* Tamu Wajib Lapor Stats */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Status Tamu Wajib Lapor</h2>
+          <h2 className="text-xl font-semibold mb-4">
+            Status Tamu Wajib Lapor
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <StatsCard
               title="Total Laporan"
@@ -179,7 +193,11 @@ export default function AdminDashboard() {
                     {stats.tamuWajibLapor.recentSubmissions.map((item) => (
                       <TableRow key={item.id}>
                         <TableCell>
-                          {format(new Date(item.createdAt), 'dd MMM yyyy, HH:mm', { locale: id })}
+                          {formatDate(
+                            new Date(item.createdAt),
+                            "dd MMM yyyy, HH:mm",
+                            { locale: id }
+                          )}
                         </TableCell>
                         <TableCell>{item.nama}</TableCell>
                         <TableCell>
@@ -195,6 +213,118 @@ export default function AdminDashboard() {
                   <Link href="/admin/tamu-wajib-lapor">
                     <Button variant="link">
                       Lihat Semua <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          ) : null}
+        </div>
+
+        {/* Format Surat Stats */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Statistik Format Surat</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatsCard
+              title="Total Format Surat"
+              value={stats?.surat.totalFormats ?? 0}
+              description="Format surat tersedia"
+              icon={FileText}
+              loading={isLoading}
+            />
+            <StatsCard
+              title="Total Unduhan"
+              value={stats?.surat.totalDownloads ?? 0}
+              description="Total semua unduhan"
+              icon={Download}
+              loading={isLoading}
+              colorClass="text-blue-500"
+            />
+          </div>
+
+          {/* Download Statistics Chart */}
+          {stats?.surat.downloadStats.length ? (
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle>Format Surat Terpopuler</CardTitle>
+                <CardDescription>
+                  3 format surat dengan unduhan terbanyak
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={stats?.surat.downloadStats || []}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis
+                        allowDecimals={false}
+                        domain={[0, "auto"]}
+                        tickCount={5}
+                      />
+                      <Tooltip
+                        formatter={(value: number) => [
+                          Math.round(value),
+                          "Unduhan",
+                        ]}
+                      />
+                      <Bar
+                        dataKey="downloadCount"
+                        fill="#3b82f6"
+                        name="Jumlah Unduhan"
+                        label={{
+                          position: "top",
+                          formatter: (value: number) => Math.round(value),
+                        }}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {/* Recent Formats */}
+          {stats?.surat.recentFormats.length ? (
+            <Card className="mt-4">
+              <CardHeader>
+                <CardTitle>Format Surat Terbaru</CardTitle>
+                <CardDescription>
+                  3 format surat terbaru yang ditambahkan
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nama Format</TableHead>
+                      <TableHead>Total Unduhan</TableHead>
+                      <TableHead>Tanggal Ditambahkan</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {stats.surat.recentFormats.map((format) => (
+                      <TableRow key={format.id}>
+                        <TableCell>{format.nama}</TableCell>
+                        <TableCell>{format.totalDownloads}</TableCell>
+                        <TableCell>
+                          {formatDate(
+                            new Date(format.createdAt),
+                            "dd MMM yyyy",
+                            {
+                              locale: id,
+                            }
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                <div className="mt-4 text-right">
+                  <Link href="/admin/surat">
+                    <Button variant="link">
+                      Kelola Format Surat{" "}
+                      <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   </Link>
                 </div>
@@ -220,7 +350,10 @@ export default function AdminDashboard() {
             <CardContent>
               <div className="space-y-4">
                 {stats?.tourism.recentDestinations.map((destination) => (
-                  <div key={destination.id} className="flex items-center space-x-4">
+                  <div
+                    key={destination.id}
+                    className="flex items-center space-x-4"
+                  >
                     <DestinationImage
                       src={destination.image}
                       alt={destination.name}
@@ -263,7 +396,13 @@ export default function AdminDashboard() {
                   <div key={announcement.id} className="space-y-1">
                     <h4 className="font-semibold">{announcement.judul}</h4>
                     <p className="text-sm text-muted-foreground">
-                      {format(new Date(announcement.tanggal), 'dd MMM yyyy', { locale: id })}
+                      {formatDate(
+                        new Date(announcement.tanggal),
+                        "dd MMM yyyy",
+                        {
+                          locale: id,
+                        }
+                      )}
                     </p>
                   </div>
                 ))}
