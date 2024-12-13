@@ -100,9 +100,15 @@ const SuratPage: React.FC = () => {
       transition={{ duration: 0.5 }}
       className="container mx-auto px-4 py-8"
     >
-      <h1 className="text-4xl font-bold mb-8 text-center">
+      <h1 className="text-4xl font-bold mb-4 text-center">
         Layanan Administrasi Surat
       </h1>
+      <p className="text-gray-600 mb-6 text-center">
+        Jika surat sudah siap, silahkan upload pada halaman ini{" "}
+        <a href="../kirim-surat" className="text-blue-500 underline">
+          Kirim Surat
+        </a>{" "}
+      </p>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
         {/* Format Surat */}
