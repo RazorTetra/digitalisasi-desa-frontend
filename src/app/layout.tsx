@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import { siteConfig } from "@/config/site";
 import "./globals.css";
 import { Providers } from "@/components/providers";
+import { LoadingScreen } from "@/components/loading-screen";
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -105,6 +106,7 @@ export default function RootLayout({
       <head />
       <body>
         <Providers>
+        <LoadingScreen />
           {children}
         </Providers>
       </body>

@@ -72,7 +72,7 @@ const InformasiDesaPage: React.FC = () => {
 
   if (error) {
     return (
-      <Alert variant="destructive" className="m-4">
+      <Alert variant="destructive" className="my-4 ">
         <AlertDescription>{error}</AlertDescription>
       </Alert>
     );
