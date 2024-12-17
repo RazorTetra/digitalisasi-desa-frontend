@@ -27,7 +27,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Desa Tandengan Digital by Alisia Timunghide
+          © {new Date().getFullYear()} Desa Tandengan Digital by Alisia Timuhingide
         </div>
       </div>
     </footer>
