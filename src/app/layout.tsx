@@ -37,7 +37,10 @@ export const metadata: Metadata = {
     "Digitalisasi Desa",
     "Administrasi Desa",
     "Transparansi",
-    "Sulawesi Utara"
+    "Sulawesi Utara",
+    "Pemerintahan Desa",
+    "Layanan Masyarakat",
+    "Informasi Desa"
   ],
   authors: [
     {
@@ -70,7 +73,7 @@ export const metadata: Metadata = {
     creator: "@desatandengan",
   },
   icons: {
-    // icon: "/favicon.ico",
+    icon: "/favicon.ico",
     shortcut: "/favicon-16x16.png",
     apple: "/apple-touch-icon.png",
     other: {
@@ -78,18 +81,18 @@ export const metadata: Metadata = {
       url: "/apple-touch-icon-precomposed.png",
     },
   },
-  // manifest: "/site.webmanifest",
-  // robots: {
-  //   index: true,
-  //   follow: true,
-  //   googleBot: {
-  //     index: true,
-  //     follow: true,
-  //     "max-video-preview": -1,
-  //     "max-image-preview": "large",
-  //     "max-snippet": -1,
-  //   },
-  // },
+  manifest: "/site.webmanifest",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 };
 
 export default function RootLayout({
