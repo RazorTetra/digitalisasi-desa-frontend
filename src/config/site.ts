@@ -8,7 +8,7 @@ const DEV_DOMAIN = 'http://localhost:3160';
 
 export const siteConfig = {
   name: "Desa Tandengan Digital",
-  description: "Website digitalisasi Desa Tandengan untuk memudahkan pelayanan dan akses informasi bagi masyarakat.",
+  description: "Website Desa Tandengan untuk memudahkan pelayanan dan akses informasi bagi masyarakat.",
   // Gunakan domain sesuai environment
   url: isProd ? MAIN_DOMAIN : DEV_DOMAIN,
   // Simpan Vercel URL untuk backup

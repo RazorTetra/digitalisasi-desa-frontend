@@ -31,6 +31,8 @@ export const metadata: Metadata = {
   },
   description: siteConfig.description,
   keywords: [
+    "Tandengan",
+    "tandengan",
     "Desa Tandengan",
     "Website Desa",
     "Pelayanan Publik",
