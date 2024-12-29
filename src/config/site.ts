@@ -2,7 +2,7 @@
 const isProd = process.env.NODE_ENV === 'production';
 
 // Base URL configuration
-const MAIN_DOMAIN = 'https://tandengan.id';
+const MAIN_DOMAIN = 'https://www.tandengan.id';
 const VERCEL_DOMAIN = 'https://desa-tandengan.vercel.app';
 const DEV_DOMAIN = 'http://localhost:3160';
 
@@ -15,7 +15,7 @@ export const siteConfig = {
   vercelUrl: VERCEL_DOMAIN,
   // Asset URLs
   ogImage: isProd ? `${MAIN_DOMAIN}/og.jpg` : `${DEV_DOMAIN}/og.jpg`,
-  author: "Alisia Timunghide",
+  author: "Alisia Timuhingide",
   authorUrl: isProd ? MAIN_DOMAIN : DEV_DOMAIN,
   links: {
     facebook: "https://facebook.com/desatandengan",

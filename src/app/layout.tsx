@@ -1,49 +1,26 @@
 // src/app/layout.tsx
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { siteConfig } from "@/config/site";
+import { seoConfig } from "@/config/seo";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { LoadingScreen } from "@/components/loading-screen";
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ["latin"],
-  display: 'swap', // Optimize font loading
-  variable: '--font-inter', // Enable CSS variable for the font
+  display: "swap",
+  variable: "--font-inter",
 });
-
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 1,
-  colorScheme: 'dark light',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#000000' }
-  ],
-};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: siteConfig.name,
-    template: `%s | ${siteConfig.name}`,
+    default: "Website Resmi Desa Tandengan | Desa Tandengan Digital",
+    template: `%s | Desa Tandengan Digital`,
   },
-  description: siteConfig.description,
-  keywords: [
-    "Tandengan",
-    "tandengan",
-    "Desa Tandengan",
-    "Website Desa",
-    "Pelayanan Publik",
-    "Digitalisasi Desa",
-    "Administrasi Desa",
-    "Transparansi",
-    "Sulawesi Utara",
-    "Pemerintahan Desa",
-    "Layanan Masyarakat",
-    "Informasi Desa"
-  ],
+  description: seoConfig.descriptions.home,
+  keywords: seoConfig.getMetaKeywords(),
   authors: [
     {
       name: siteConfig.author,
@@ -51,28 +28,30 @@ export const metadata: Metadata = {
     },
   ],
   creator: siteConfig.author,
+  publisher: siteConfig.author,
   openGraph: {
     type: "website",
     locale: "id_ID",
     url: siteConfig.url,
-    title: siteConfig.name,
-    description: siteConfig.description,
+    title: "Website Resmi Desa Tandengan | Desa Tandengan Digital",
+    description: seoConfig.descriptions.home,
     siteName: siteConfig.name,
     images: [
       {
         url: siteConfig.ogImage,
         width: 1200,
         height: 630,
-        alt: siteConfig.name,
+        alt: "Desa Tandengan Digital",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: siteConfig.name,
-    description: siteConfig.description,
+    title: "Desa Tandengan Digital",
+    description: seoConfig.descriptions.home,
     images: [siteConfig.ogImage],
     creator: "@desatandengan",
+    site: "@desatandengan",
   },
   icons: {
     icon: "/favicon.ico",
@@ -87,31 +66,39 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+    nocache: true,
     googleBot: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
   },
+  verification: {
+    google: "LgKPILz_b6aoYtStROR5iQ_YZDQ6_DYm1tfqMDTdkEw",
+  },
+  category: "government",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html 
-      lang="id" 
-      suppressHydrationWarning 
-      className={inter.variable}
-    >
-      <head />
+    <html lang="id" suppressHydrationWarning className={inter.variable}>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(seoConfig.organizationSchema),
+          }}
+        />
+      </head>
       <body>
         <Providers>
-        <LoadingScreen />
+          <LoadingScreen />
           {children}
         </Providers>
       </body>

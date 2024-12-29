@@ -147,99 +147,42 @@ export default function Home(): JSX.Element {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background">
       {/* Hero Section */}
-      <HeroSection slides={slides} />
-      {/* <section className="relative h-[60vh] min-h-[500px] flex items-center">
-        <div className="absolute inset-0 z-0">
-          {heroBanner?.imageUrl ? (
-            <>
-              <Image
-                src={heroBanner.imageUrl}
-                alt="Desa Tandengan"
-                fill
-                priority
-                sizes="100vw"
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/60" />
-            </>
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-r from-background to-background/60" />
-          )}
-        </div>
-
-        <div className="container relative z-10 mx-auto px-6">
-          <div className="max-w-2xl space-y-6">
-            <AnimatePresence mode="wait">
-              <motion.h1
-                key={currentSlide}
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -50 }}
-                transition={{ duration: 0.5 }}
-                className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground"
-              >
-                {slides[currentSlide]}
-              </motion.h1>
-            </AnimatePresence>
-            <p className="text-lg md:text-xl text-muted-foreground">
-              Akses layanan desa kapanpun dan dimanapun. Kami berkomitmen
-              memberikan pelayanan publik yang efisien, transparan, dan inovatif
-              untuk kesejahteraan masyarakat.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="text-lg" asChild>
-                <Link href="/kirim-surat">
-                  Ajukan Surat Online
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button size="lg" variant="outline" className="text-lg" asChild>
-                <Link href="/informasi-desa">Tentang Desa</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: 1,
-            repeat: Infinity,
-            repeatType: "reverse",
-          }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
-        >
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              const servicesSection =
-                document.getElementById("layanan-section");
-              servicesSection?.scrollIntoView({ behavior: "smooth" });
-            }}
-          >
-            <ChevronDown className="h-8 w-8" />
-          </Button>
-        </motion.div>
-      </section> */}
+      <HeroSection 
+        slides={slides} 
+        aria-label="Selamat datang di Website Desa Tandengan" 
+      />
 
       {/* Main Services Section */}
-      <section id="layanan-section" className="py-16 bg-secondary/30">
+      <section 
+        id="layanan-section" 
+        className="py-16 bg-secondary/30"
+        aria-labelledby="layanan-heading"
+      >
         <div className="container mx-auto px-6">
-          <h2 className="text-3xl font-bold mb-12">Layanan Tersedia</h2>
+          <h2 
+            id="layanan-heading" 
+            className="text-3xl font-bold mb-12"
+          >
+            Layanan Tersedia di Desa Tandengan
+          </h2>
           <motion.div
             className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.2 }}
+            role="list"
+            aria-label="Daftar layanan desa"
           >
             {services.map((service, index) => (
-              <motion.div key={index} variants={itemVariants}>
-                <Link href={service.link}>
+              <motion.div 
+                key={index} 
+                variants={itemVariants}
+                role="listitem"
+              >
+                <Link href={service.link} aria-label={`Akses ${service.title}: ${service.desc}`}>
                   <Card className="h-full hover:shadow-lg transition-all duration-300 group relative border-2 hover:border-primary">
                     {service.badge && (
                       <Badge className="absolute top-4 right-4">
@@ -248,7 +191,10 @@ export default function Home(): JSX.Element {
                     )}
                     <CardHeader className="space-y-4">
                       <div className="flex items-center gap-4">
-                        <service.icon className="h-8 w-8 text-primary" />
+                        <service.icon 
+                          className="h-8 w-8 text-primary" 
+                          aria-hidden="true"
+                        />
                         <CardTitle className="text-xl group-hover:text-primary transition-colors">
                           {service.title}
                         </CardTitle>
@@ -266,18 +212,30 @@ export default function Home(): JSX.Element {
       </section>
 
       {/* Info Section - Pengumuman & Social Media */}
-      <section className="py-16">
+      <section 
+        className="py-16"
+        aria-labelledby="info-section"
+      >
         <div className="container mx-auto px-6">
           <div className="grid lg:grid-cols-3 gap-12">
             {/* Pengumuman Column */}
-            <div className="lg:col-span-2">
-              <h2 className="text-3xl font-bold mb-8 flex items-center gap-3">
-                <Bell className="h-7 w-7 text-primary" />
-                Pengumuman Terbaru
+            <div 
+              className="lg:col-span-2"
+              aria-labelledby="pengumuman-heading"
+            >
+              <h2 
+                id="pengumuman-heading" 
+                className="text-3xl font-bold mb-8 flex items-center gap-3"
+              >
+                <Bell 
+                  className="h-7 w-7 text-primary" 
+                  aria-hidden="true"
+                />
+                Pengumuman Terbaru Desa Tandengan
               </h2>
 
               {loading ? (
-                <div className="space-y-6">
+                <div className="space-y-6" aria-label="Memuat pengumuman...">
                   {[...Array(3)].map((_, i) => (
                     <Card key={i}>
                       <CardContent className="py-6">
@@ -296,16 +254,27 @@ export default function Home(): JSX.Element {
                   <AlertDescription>{error}</AlertDescription>
                 </Alert>
               ) : (
-                <div className="space-y-6">
+                <div 
+                  className="space-y-6"
+                  role="feed"
+                  aria-label="Daftar pengumuman terbaru"
+                >
                   {pengumuman.map((item) => (
-                    <Link key={item.id} href={`/pengumuman/${item.id}`}>
+                    <Link 
+                      key={item.id} 
+                      href={`/pengumuman/${item.id}`}
+                      aria-label={`Pengumuman: ${item.judul}, tanggal ${format(new Date(item.tanggal), "dd MMMM yyyy", { locale: id })}`}
+                    >
                       <Card className="hover:shadow-md transition-shadow hover:border-primary">
                         <CardContent className="py-6">
-                          <p className="text-base text-muted-foreground mb-3">
+                          <time 
+                            dateTime={item.tanggal}
+                            className="text-base text-muted-foreground mb-3 block"
+                          >
                             {format(new Date(item.tanggal), "dd MMMM yyyy", {
                               locale: id,
                             })}
-                          </p>
+                          </time>
                           <h3 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors">
                             {item.judul}
                           </h3>
@@ -321,11 +290,16 @@ export default function Home(): JSX.Element {
             </div>
 
             {/* Social Media Column */}
-            <div>
-              <h2 className="text-3xl font-bold mb-8">Media Sosial</h2>
+            <div aria-labelledby="sosmed-heading">
+              <h2 
+                id="sosmed-heading"
+                className="text-3xl font-bold mb-8"
+              >
+                Media Sosial Desa
+              </h2>
               <div className="space-y-4">
                 {loading ? (
-                  <div className="space-y-4">
+                  <div className="space-y-4" aria-label="Memuat media sosial...">
                     {[...Array(3)].map((_, i) => (
                       <div
                         key={i}
@@ -341,7 +315,11 @@ export default function Home(): JSX.Element {
                     </AlertDescription>
                   </Alert>
                 ) : (
-                  <div className="space-y-4">
+                  <div 
+                    className="space-y-4"
+                    role="list"
+                    aria-label="Daftar media sosial desa"
+                  >
                     {socialMedia?.map((social) => (
                       <Button
                         key={social.id}
@@ -355,6 +333,7 @@ export default function Home(): JSX.Element {
                           className="flex items-center gap-3"
                           target="_blank"
                           rel="noopener noreferrer"
+                          aria-label={`Kunjungi ${social.platform} Desa Tandengan`}
                         >
                           {social.platform}
                         </Link>
@@ -369,11 +348,20 @@ export default function Home(): JSX.Element {
       </section>
 
       {/* Map Section */}
-      <section className="py-16 bg-secondary/30">
+      <section 
+        className="py-16 bg-secondary/30"
+        aria-labelledby="map-heading"
+      >
         <div className="container mx-auto px-6">
-          <h2 className="text-3xl font-bold mb-8 flex items-center gap-3">
-            <MapPin className="h-7 w-7 text-primary" />
-            Lokasi Desa
+          <h2 
+            id="map-heading"
+            className="text-3xl font-bold mb-8 flex items-center gap-3"
+          >
+            <MapPin 
+              className="h-7 w-7 text-primary" 
+              aria-hidden="true"
+            />
+            Lokasi Desa Tandengan
           </h2>
           <div className="aspect-video w-full rounded-xl overflow-hidden shadow-lg">
             <iframe
@@ -385,10 +373,12 @@ export default function Home(): JSX.Element {
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
               className="w-full h-full"
+              title="Peta lokasi Desa Tandengan"
+              aria-label="Peta Google Maps menunjukkan lokasi Desa Tandengan"
             />
           </div>
         </div>
       </section>
-    </div>
+    </main>
   );
 }

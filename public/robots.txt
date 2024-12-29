@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://tandengan.id/sitemap.xml
+
+# Disallow certain paths
+Disallow: /api/
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
